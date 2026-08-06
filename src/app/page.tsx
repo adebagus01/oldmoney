@@ -9,6 +9,7 @@ import { SectionLabel } from "@/components/section-label";
 import { NoteField } from "@/components/note-field";
 import { DateField } from "@/components/date-field";
 import { TransactionList } from "@/components/transaction-list";
+import { useToast } from "@/components/toast-provider";
 import type { PaymentMethod } from "@/lib/payment-methods";
 import type { Category, Transaction, TransactionType } from "@/lib/types";
 
@@ -32,6 +33,7 @@ export default function AddPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const amountRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const categoriesForType = useMemo(
     () => categories.filter((c) => c.type === type),
@@ -105,6 +107,7 @@ export default function AddPage() {
       setDate(todayIso());
       await loadRecent();
       amountRef.current?.focus();
+      toast(type === "expense" ? "Expense added" : "Income added");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
     } finally {
