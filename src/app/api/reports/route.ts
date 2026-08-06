@@ -5,12 +5,14 @@ import type { Prisma } from "@/generated/prisma/client";
 
 export async function GET(req: NextRequest) {
   const params = req.nextUrl.searchParams;
+  const typeParam = params.get("type");
+  const type = typeParam === "income" ? "income" : "expense";
   const categoryId = params.get("categoryId");
   const from = params.get("from");
   const to = params.get("to");
   const sort = params.get("sort") ?? "date_desc";
 
-  const where: Prisma.TransactionWhereInput = { type: "expense" };
+  const where: Prisma.TransactionWhereInput = { type };
   if (categoryId) where.categoryId = categoryId;
   if (from || to) {
     where.occurredAt = {};

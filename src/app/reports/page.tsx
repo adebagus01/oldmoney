@@ -1,118 +1,125 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatIDR } from "@/lib/money";
-import { TransactionList } from "@/components/transaction-list";
+import { clsx } from "clsx";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { formatIDR, currentMonthKey, monthKeyLabel, shiftMonthKey, toMonthRange } from "@/lib/money";
+import { DailyGroupedTransactions } from "@/components/daily-grouped-transactions";
 import { CategoryBreakdown } from "@/components/category-breakdown";
-import type { Category, ReportResponse } from "@/lib/types";
+import type { Category, ReportResponse, TransactionType } from "@/lib/types";
 
 type SortKey = "date_desc" | "date_asc" | "amount_desc" | "amount_asc";
 
-function todayIso(): string {
-  const now = new Date();
-  return now.toISOString().slice(0, 10);
-}
-
-function firstOfMonthIso(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-}
-
 export default function ReportsPage() {
+  const [type, setType] = useState<TransactionType>("expense");
+  const [month, setMonth] = useState(currentMonthKey());
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState("");
-  const [from, setFrom] = useState(firstOfMonthIso());
-  const [to, setTo] = useState(todayIso());
   const [sort, setSort] = useState<SortKey>("date_desc");
   const [data, setData] = useState<ReportResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const isCurrentMonth = month === currentMonthKey();
+
   useEffect(() => {
-    fetch("/api/categories?type=expense")
+    setCategoryId("");
+    fetch(`/api/categories?type=${type}`)
       .then((res) => res.json())
       .then(setCategories);
-  }, []);
+  }, [type]);
 
   useEffect(() => {
     setLoading(true);
-    const params = new URLSearchParams({ sort });
+    const { start, end } = toMonthRange(month);
+    const params = new URLSearchParams({
+      type,
+      sort,
+      from: start.toISOString().slice(0, 10),
+      to: end.toISOString().slice(0, 10),
+    });
     if (categoryId) params.set("categoryId", categoryId);
-    if (from) params.set("from", from);
-    if (to) {
-      const exclusiveEnd = new Date(to);
-      exclusiveEnd.setDate(exclusiveEnd.getDate() + 1);
-      params.set("to", exclusiveEnd.toISOString().slice(0, 10));
-    }
     fetch(`/api/reports?${params}`)
       .then((res) => res.json())
       .then(setData)
       .finally(() => setLoading(false));
-  }, [categoryId, from, to, sort]);
-
-  function setThisMonth() {
-    setFrom(firstOfMonthIso());
-    setTo(todayIso());
-  }
+  }, [type, month, categoryId, sort]);
 
   return (
     <div className="mx-auto max-w-2xl px-5 py-6 md:py-10">
       <h1 className="mb-6 text-lg font-semibold text-text-primary">Reports</h1>
 
-      <div className="mb-6 space-y-3">
-        <div className="grid grid-cols-2 gap-3">
-          <label className="flex flex-col gap-1">
-            <span className="text-xs text-text-muted">From</span>
-            <input
-              type="date"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-              className="rounded-lg border border-border bg-surface px-3 py-2 text-base text-text-primary outline-none focus:ring-2 focus:ring-accent md:text-sm"
-            />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-xs text-text-muted">To</span>
-            <input
-              type="date"
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-              className="rounded-lg border border-border bg-surface px-3 py-2 text-base text-text-primary outline-none focus:ring-2 focus:ring-accent md:text-sm"
-            />
-          </label>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="mb-4 flex justify-center">
+        <div className="inline-flex rounded-full border border-border bg-surface p-1">
           <button
             type="button"
-            onClick={setThisMonth}
-            className="rounded-full border border-border px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text-primary"
+            onClick={() => setType("expense")}
+            className={clsx(
+              "rounded-full px-5 py-2 text-sm font-semibold transition-colors",
+              type === "expense" ? "bg-negative/15 text-negative" : "text-text-muted"
+            )}
           >
-            This month
+            Expense
           </button>
-
-          <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="rounded-full border border-border bg-surface px-3 py-1.5 text-base font-medium text-text-primary outline-none md:text-xs"
+          <button
+            type="button"
+            onClick={() => setType("income")}
+            className={clsx(
+              "rounded-full px-5 py-2 text-sm font-semibold transition-colors",
+              type === "income" ? "bg-positive/15 text-positive" : "text-text-muted"
+            )}
           >
-            <option value="">All categories</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as SortKey)}
-            className="rounded-full border border-border bg-surface px-3 py-1.5 text-base font-medium text-text-primary outline-none md:text-xs"
-          >
-            <option value="date_desc">Newest first</option>
-            <option value="date_asc">Oldest first</option>
-            <option value="amount_desc">Highest amount</option>
-            <option value="amount_asc">Lowest amount</option>
-          </select>
+            Income
+          </button>
         </div>
+      </div>
+
+      <div className="mb-4 flex items-center justify-between rounded-xl border border-border bg-surface px-3 py-2.5">
+        <button
+          type="button"
+          onClick={() => setMonth((m) => shiftMonthKey(m, -1))}
+          className="rounded-md p-1.5 text-text-muted hover:text-text-primary"
+          aria-label="Previous month"
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <span className="text-sm font-semibold text-text-primary">
+          {monthKeyLabel(month)}
+        </span>
+        <button
+          type="button"
+          onClick={() => setMonth((m) => shiftMonthKey(m, 1))}
+          disabled={isCurrentMonth}
+          className="rounded-md p-1.5 text-text-muted hover:text-text-primary disabled:opacity-30"
+          aria-label="Next month"
+        >
+          <ChevronRight size={18} />
+        </button>
+      </div>
+
+      <div className="mb-6 flex flex-wrap items-center gap-2">
+        <select
+          value={categoryId}
+          onChange={(e) => setCategoryId(e.target.value)}
+          className="rounded-full border border-border bg-surface px-3 py-1.5 text-base font-medium text-text-primary outline-none md:text-xs"
+        >
+          <option value="">All categories</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value as SortKey)}
+          className="rounded-full border border-border bg-surface px-3 py-1.5 text-base font-medium text-text-primary outline-none md:text-xs"
+        >
+          <option value="date_desc">Newest first</option>
+          <option value="date_asc">Oldest first</option>
+          <option value="amount_desc">Highest amount</option>
+          <option value="amount_asc">Lowest amount</option>
+        </select>
       </div>
 
       {loading || !data ? (
@@ -120,8 +127,15 @@ export default function ReportsPage() {
       ) : (
         <>
           <div className="mb-6 rounded-2xl border border-border bg-surface p-5">
-            <div className="text-xs text-text-muted">Total spent</div>
-            <div className="tabular-nums text-3xl font-bold text-negative">
+            <div className="text-xs text-text-muted">
+              {type === "expense" ? "Total spent" : "Total earned"}
+            </div>
+            <div
+              className={clsx(
+                "tabular-nums text-3xl font-bold",
+                type === "expense" ? "text-negative" : "text-positive"
+              )}
+            >
               {formatIDR(BigInt(data.total))}
             </div>
           </div>
@@ -138,9 +152,9 @@ export default function ReportsPage() {
           <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
             Transactions
           </h2>
-          <TransactionList
+          <DailyGroupedTransactions
             transactions={data.transactions}
-            emptyMessage="No expenses in this range."
+            emptyMessage={`No ${type === "expense" ? "expenses" : "income"} this month.`}
           />
         </>
       )}
