@@ -39,19 +39,32 @@ the Add screen.
 
 1. **Provision a Postgres database.** In the Vercel dashboard, open your
    project → **Storage** → **Create Database**, and pick a Postgres option
-   (Neon is Vercel's built-in one). This gives you a `DATABASE_URL` and
-   wires it into your project's environment variables automatically — or
-   use any other Postgres provider and set `DATABASE_URL` yourself under
-   **Settings → Environment Variables**.
-2. **Import the repo.** Vercel dashboard → **Add New… → Project** → import
+   (Neon is Vercel's built-in one).
+2. **Set two environment variables**, not just one — this is the part that's
+   easy to miss. Neon/Vercel Postgres give you a *pooled* connection string
+   (through PgBouncer) and a separate *direct/unpooled* one:
+   - `DATABASE_URL` — the **pooled** connection string. Used by the app at
+     runtime; pooling is what you want for serverless functions.
+   - `DIRECT_URL` — the **unpooled/direct** connection string. Used only by
+     `prisma migrate deploy` during the build. Migrations take a
+     session-level advisory lock, which a transaction-mode pooler like
+     PgBouncer can't hold — using the pooled URL for migrations fails with
+     `Error P1002: The database server was reached but timed out`.
+
+     In the Neon integration these are usually already provided under
+     different names (e.g. `DATABASE_URL_UNPOOLED`, or `POSTGRES_URL` vs.
+     `POSTGRES_URL_NON_POOLING`) — copy whichever one is the *non-pooling*
+     string into a `DIRECT_URL` variable under **Settings → Environment
+     Variables**.
+3. **Import the repo.** Vercel dashboard → **Add New… → Project** → import
    `adebagus01/oldmoney`. It auto-detects Next.js; no config needed.
-3. **Deploy.** The build runs `vercel-build` (`prisma migrate deploy && next
+4. **Deploy.** The build runs `vercel-build` (`prisma migrate deploy && next
    build`), so your schema is applied automatically on every deploy —
    no separate migration step to remember.
-4. First deploy will land with an empty database. Seed it once, from your
+5. First deploy will land with an empty database. Seed it once, from your
    machine, pointed at the production `DATABASE_URL`:
    ```bash
-   DATABASE_URL="<value from Vercel>" npm run db:seed
+   DATABASE_URL="<pooled value from Vercel>" npm run db:seed
    ```
 
 From then on, every push to the deployed branch redeploys and migrates

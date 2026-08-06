@@ -9,7 +9,12 @@ export default defineConfig({
     path: "prisma/migrations",
     seed: "tsx prisma/seed.ts",
   },
+  // Used only by Prisma CLI commands (migrate/introspect) — needs a direct,
+  // non-pooled connection because PgBouncer-style poolers (Neon, Vercel
+  // Postgres) can't hold the session-level advisory lock migrations take.
+  // The app's runtime client never reads this; it's given DATABASE_URL
+  // (which can stay pooled) directly in src/lib/prisma.ts.
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"],
   },
 });
