@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { formatIDR } from "@/lib/money";
 import { currentMonthKey, monthKeyLabel, shiftMonthKey } from "@/lib/money";
+import { LifetimeCard } from "@/components/lifetime-card";
+import { CategoryBreakdown } from "@/components/category-breakdown";
+import { DailyTrendChart } from "@/components/daily-trend-chart";
 import type { BalanceResponse } from "@/lib/types";
 
 export default function BalancePage() {
@@ -56,7 +59,8 @@ export default function BalancePage() {
               numbers here.
             </p>
           ) : null}
-          <section className="mb-8 rounded-2xl border border-border bg-surface p-5">
+
+          <section className="mb-6 rounded-2xl border border-border bg-surface p-5">
             <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-text-muted">
               This month
             </h2>
@@ -82,25 +86,27 @@ export default function BalancePage() {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-accent/30 bg-accent/5 p-5">
+          <section className="mb-6 rounded-2xl border border-border bg-surface p-5">
             <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-text-muted">
-              All time
+              Daily spending
             </h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="text-xs text-text-muted">Total income earned</div>
-                <div className="tabular-nums text-2xl font-bold text-text-primary">
-                  {formatIDR(BigInt(data.lifetime.income))}
-                </div>
-              </div>
-              <div>
-                <div className="text-xs text-text-muted">Net (income − expenses)</div>
-                <div className="tabular-nums text-2xl font-semibold text-text-primary">
-                  {formatIDR(BigInt(data.lifetime.net))}
-                </div>
-              </div>
-            </div>
+            <DailyTrendChart data={data.dailyExpenses} />
           </section>
+
+          {data.categoryBreakdown.length > 0 ? (
+            <section className="mb-6 rounded-2xl border border-border bg-surface p-5">
+              <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-text-muted">
+                Spending by category
+              </h2>
+              <CategoryBreakdown breakdown={data.categoryBreakdown} />
+            </section>
+          ) : null}
+
+          <LifetimeCard
+            income={data.lifetime.income}
+            expenses={data.lifetime.expenses}
+            net={data.lifetime.net}
+          />
         </>
       ) : (
         <p className="py-8 text-center text-sm text-text-muted">Loading…</p>

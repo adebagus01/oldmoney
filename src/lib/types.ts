@@ -20,14 +20,18 @@ export type Transaction = {
   category: Category;
 };
 
+export type CategoryTotal = { category: Category; total: string };
+
 export type BalanceResponse = {
   month: string;
   monthly: { income: string; expenses: string; remaining: string };
   lifetime: { income: string; expenses: string; net: string };
+  categoryBreakdown: CategoryTotal[];
+  dailyExpenses: { date: string; total: string }[];
 };
 
 export type ReportResponse = {
   total: string;
   transactions: Transaction[];
-  breakdown: { category: Category; total: string }[];
+  breakdown: CategoryTotal[];
 };

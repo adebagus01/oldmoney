@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { formatIDR } from "@/lib/money";
 import { TransactionList } from "@/components/transaction-list";
+import { CategoryBreakdown } from "@/components/category-breakdown";
 import type { Category, ReportResponse } from "@/lib/types";
 
 type SortKey = "date_desc" | "date_asc" | "amount_desc" | "amount_asc";
@@ -52,14 +53,6 @@ export default function ReportsPage() {
     setFrom(firstOfMonthIso());
     setTo(todayIso());
   }
-
-  const maxBreakdown = useMemo(
-    () =>
-      data
-        ? Math.max(...data.breakdown.map((b) => Number(b.total)), 1)
-        : 1,
-    [data]
-  );
 
   return (
     <div className="mx-auto max-w-2xl px-5 py-6 md:py-10">
@@ -138,33 +131,7 @@ export default function ReportsPage() {
               <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-text-muted">
                 By category
               </h2>
-              <div className="space-y-2.5">
-                {data.breakdown.map((b) => (
-                  <div key={b.category.id}>
-                    <div className="mb-1 flex items-center justify-between text-sm">
-                      <span className="flex items-center gap-2 text-text-primary">
-                        <span
-                          className="h-2 w-2 rounded-full"
-                          style={{ backgroundColor: b.category.color }}
-                        />
-                        {b.category.name}
-                      </span>
-                      <span className="tabular-nums text-text-muted">
-                        {formatIDR(BigInt(b.total))}
-                      </span>
-                    </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-surface-raised">
-                      <div
-                        className="h-full rounded-full"
-                        style={{
-                          width: `${(Number(b.total) / maxBreakdown) * 100}%`,
-                          backgroundColor: b.category.color,
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <CategoryBreakdown breakdown={data.breakdown} />
             </div>
           ) : null}
 
