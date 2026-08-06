@@ -1,19 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { clsx } from "clsx";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { currentMonthKey, monthKeyLabel, shiftMonthKey, toMonthRange } from "@/lib/money";
 import { useCurrency } from "@/components/currency-provider";
 import { useToast } from "@/components/toast-provider";
+import { useDeleteWithUndo } from "@/lib/use-delete-with-undo";
 import { DailyGroupedTransactions } from "@/components/daily-grouped-transactions";
 import { CategoryBreakdown } from "@/components/category-breakdown";
 import { EditTransactionModal } from "@/components/edit-transaction-modal";
 import type { Category, CategoryTotal, ReportResponse, Transaction, TransactionType } from "@/lib/types";
 
 type SortKey = "date_desc" | "date_asc" | "amount_desc" | "amount_asc";
-
-const DELETE_UNDO_WINDOW_MS = 4000;
 
 export default function ReportsPage() {
   const [type, setType] = useState<TransactionType>("expense");
@@ -23,11 +22,10 @@ export default function ReportsPage() {
   const [sort, setSort] = useState<SortKey>("date_desc");
   const [data, setData] = useState<ReportResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<string>>(new Set());
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
-  const deleteTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const { format } = useCurrency();
   const { toast } = useToast();
+  const { visibleTransactions, requestDelete } = useDeleteWithUndo(data?.transactions ?? []);
 
   const isCurrentMonth = month === currentMonthKey();
 
@@ -40,7 +38,6 @@ export default function ReportsPage() {
 
   const loadReport = useCallback(() => {
     setLoading(true);
-    setPendingDeleteIds(new Set());
     const { start, end } = toMonthRange(month);
     const params = new URLSearchParams({
       type,
@@ -59,11 +56,6 @@ export default function ReportsPage() {
     loadReport();
   }, [loadReport]);
 
-  const visibleTransactions = useMemo(
-    () => data?.transactions.filter((t) => !pendingDeleteIds.has(t.id)) ?? [],
-    [data, pendingDeleteIds]
-  );
-
   const total = useMemo(
     () => visibleTransactions.reduce((sum, t) => sum + BigInt(t.amount), 0n).toString(),
     [visibleTransactions]
@@ -80,37 +72,6 @@ export default function ReportsPage() {
       .map((b) => ({ category: b.category, total: b.total.toString() }))
       .sort((a, b) => (BigInt(b.total) > BigInt(a.total) ? 1 : -1));
   }, [visibleTransactions]);
-
-  function handleDelete(id: string) {
-    const target = data?.transactions.find((t) => t.id === id);
-    if (!target) return;
-
-    setPendingDeleteIds((prev) => new Set(prev).add(id));
-
-    const timer = setTimeout(async () => {
-      deleteTimers.current.delete(id);
-      await fetch(`/api/transactions/${id}`, { method: "DELETE" });
-    }, DELETE_UNDO_WINDOW_MS);
-    deleteTimers.current.set(id, timer);
-
-    const label = target.note ? `${target.category.name} · ${target.note}` : target.category.name;
-    toast(`Deleted "${label}"`, {
-      actionLabel: "Undo",
-      duration: DELETE_UNDO_WINDOW_MS,
-      onAction: () => {
-        const pendingTimer = deleteTimers.current.get(id);
-        if (pendingTimer) {
-          clearTimeout(pendingTimer);
-          deleteTimers.current.delete(id);
-        }
-        setPendingDeleteIds((prev) => {
-          const next = new Set(prev);
-          next.delete(id);
-          return next;
-        });
-      },
-    });
-  }
 
   async function handleSaved() {
     setEditingTransaction(null);
@@ -229,7 +190,7 @@ export default function ReportsPage() {
           <DailyGroupedTransactions
             transactions={visibleTransactions}
             onEdit={setEditingTransaction}
-            onDelete={handleDelete}
+            onDelete={requestDelete}
             emptyMessage={`No ${type === "expense" ? "expenses" : "income"} this month.`}
           />
         </>

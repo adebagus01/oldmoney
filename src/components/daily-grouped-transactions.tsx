@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { Trash2, Pencil } from "lucide-react";
 import { useCurrency } from "@/components/currency-provider";
+import { TransactionRowMenu } from "@/components/transaction-row-menu";
 import type { Transaction } from "@/lib/types";
 
 function dayLabel(iso: string): string {
@@ -22,7 +22,7 @@ export function DailyGroupedTransactions({
 }: {
   transactions: Transaction[];
   onEdit?: (t: Transaction) => void;
-  onDelete?: (id: string) => void;
+  onDelete?: (t: Transaction) => void;
   emptyMessage?: string;
 }) {
   const { format } = useCurrency();
@@ -85,26 +85,10 @@ export function DailyGroupedTransactions({
                     {t.type === "income" ? "+" : "-"}
                     {format(t.amount)}
                   </div>
-                  {onEdit ? (
-                    <button
-                      type="button"
-                      onClick={() => onEdit(t)}
-                      className="shrink-0 rounded-md p-1.5 text-text-muted transition-colors hover:text-text-primary"
-                      aria-label="Edit transaction"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                  ) : null}
-                  {onDelete ? (
-                    <button
-                      type="button"
-                      onClick={() => onDelete(t.id)}
-                      className="shrink-0 rounded-md p-1.5 text-text-muted transition-colors hover:text-negative"
-                      aria-label="Delete transaction"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  ) : null}
+                  <TransactionRowMenu
+                    onEdit={onEdit ? () => onEdit(t) : undefined}
+                    onDelete={onDelete ? () => onDelete(t) : undefined}
+                  />
                 </li>
               ))}
             </ul>

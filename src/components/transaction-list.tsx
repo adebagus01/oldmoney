@@ -1,8 +1,8 @@
 "use client";
 
 import { useCurrency } from "@/components/currency-provider";
+import { TransactionRowMenu } from "@/components/transaction-row-menu";
 import type { Transaction } from "@/lib/types";
-import { Trash2 } from "lucide-react";
 
 function formatDate(iso: string): string {
   return new Intl.DateTimeFormat("en-US", {
@@ -14,11 +14,13 @@ function formatDate(iso: string): string {
 
 export function TransactionList({
   transactions,
+  onEdit,
   onDelete,
   emptyMessage = "No transactions yet.",
 }: {
   transactions: Transaction[];
-  onDelete?: (id: string) => void;
+  onEdit?: (t: Transaction) => void;
+  onDelete?: (t: Transaction) => void;
   emptyMessage?: string;
 }) {
   const { format } = useCurrency();
@@ -59,16 +61,10 @@ export function TransactionList({
             {t.type === "income" ? "+" : "-"}
             {format(t.amount)}
           </div>
-          {onDelete ? (
-            <button
-              type="button"
-              onClick={() => onDelete(t.id)}
-              className="shrink-0 rounded-md p-1.5 text-text-muted transition-colors hover:text-negative"
-              aria-label="Delete transaction"
-            >
-              <Trash2 size={16} />
-            </button>
-          ) : null}
+          <TransactionRowMenu
+            onEdit={onEdit ? () => onEdit(t) : undefined}
+            onDelete={onDelete ? () => onDelete(t) : undefined}
+          />
         </li>
       ))}
     </ul>

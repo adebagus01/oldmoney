@@ -9,8 +9,10 @@ import { SectionLabel } from "@/components/section-label";
 import { NoteField } from "@/components/note-field";
 import { DateField } from "@/components/date-field";
 import { TransactionList } from "@/components/transaction-list";
+import { EditTransactionModal } from "@/components/edit-transaction-modal";
 import { useToast } from "@/components/toast-provider";
 import { useCurrency } from "@/components/currency-provider";
+import { useDeleteWithUndo } from "@/lib/use-delete-with-undo";
 import type { PaymentMethod } from "@/lib/payment-methods";
 import type { Category, Transaction, TransactionType } from "@/lib/types";
 
@@ -33,9 +35,11 @@ export default function AddPage() {
   const [recent, setRecent] = useState<Transaction[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const amountRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { format } = useCurrency();
+  const { visibleTransactions, requestDelete } = useDeleteWithUndo(recent);
 
   const categoriesForType = useMemo(
     () => categories.filter((c) => c.type === type),
@@ -122,9 +126,10 @@ export default function AddPage() {
     }
   }
 
-  async function handleDelete(id: string) {
-    await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+  async function handleEditSaved() {
+    setEditingTransaction(null);
     await loadRecent();
+    toast("Changes saved");
   }
 
   return (
@@ -211,8 +216,20 @@ export default function AddPage() {
         <h2 className="mb-2 text-sm font-semibold text-text-muted">
           Recent
         </h2>
-        <TransactionList transactions={recent} onDelete={handleDelete} />
+        <TransactionList
+          transactions={visibleTransactions}
+          onEdit={setEditingTransaction}
+          onDelete={requestDelete}
+        />
       </div>
+
+      {editingTransaction ? (
+        <EditTransactionModal
+          transaction={editingTransaction}
+          onClose={() => setEditingTransaction(null)}
+          onSaved={handleEditSaved}
+        />
+      ) : null}
     </div>
   );
 }
