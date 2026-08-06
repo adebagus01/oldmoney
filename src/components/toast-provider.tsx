@@ -28,10 +28,22 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 
 const DEFAULT_DURATION = 4000;
 
-const TONE_CLASSES: Record<ToastTone, string> = {
-  neutral: "border-border bg-surface-raised text-text-primary",
-  positive: "border-positive/30 bg-positive/10 text-positive",
-  negative: "border-negative/30 bg-negative/10 text-negative",
+const TONE_BORDER: Record<ToastTone, string> = {
+  neutral: "border-border",
+  positive: "border-positive/40",
+  negative: "border-negative/40",
+};
+
+const TONE_TEXT: Record<ToastTone, string> = {
+  neutral: "text-text-primary",
+  positive: "text-positive",
+  negative: "text-negative",
+};
+
+const TONE_DOT: Record<ToastTone, string> = {
+  neutral: "bg-text-muted",
+  positive: "bg-positive",
+  negative: "bg-negative",
 };
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
@@ -66,11 +78,17 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         <div className="pointer-events-none fixed inset-x-0 bottom-20 z-50 flex justify-center px-4 md:bottom-6">
           <div
             className={clsx(
-              "pointer-events-auto flex items-center gap-3 rounded-full border px-4 py-2.5 shadow-lg",
-              TONE_CLASSES[current.tone]
+              "pointer-events-auto flex items-center gap-2.5 rounded-full border bg-surface-raised/95 px-4 py-2.5 shadow-xl backdrop-blur-md",
+              TONE_BORDER[current.tone]
             )}
           >
-            <span className="text-sm font-medium">{current.message}</span>
+            <span
+              className={clsx("h-1.5 w-1.5 shrink-0 rounded-full", TONE_DOT[current.tone])}
+              aria-hidden
+            />
+            <span className={clsx("text-sm font-medium", TONE_TEXT[current.tone])}>
+              {current.message}
+            </span>
             {current.onAction ? (
               <button
                 type="button"
@@ -78,10 +96,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   current.onAction?.();
                   dismiss();
                 }}
-                className={clsx(
-                  "text-sm font-semibold",
-                  current.tone === "neutral" ? "text-accent" : "underline underline-offset-2"
-                )}
+                className="text-sm font-semibold text-accent"
               >
                 {current.actionLabel ?? "Undo"}
               </button>
