@@ -12,13 +12,13 @@ export type CurrencyDef = {
 
 export const CURRENCIES: CurrencyDef[] = [
   { code: "IDR", label: "Indonesian Rupiah", idrPerUnit: 1 },
-  { code: "USD", label: "US Dollar", idrPerUnit: 15_800 },
-  { code: "EUR", label: "Euro", idrPerUnit: 17_200 },
-  { code: "SGD", label: "Singapore Dollar", idrPerUnit: 11_700 },
-  { code: "MYR", label: "Malaysian Ringgit", idrPerUnit: 3_350 },
-  { code: "JPY", label: "Japanese Yen", idrPerUnit: 105 },
-  { code: "GBP", label: "British Pound", idrPerUnit: 20_000 },
-  { code: "AUD", label: "Australian Dollar", idrPerUnit: 10_300 },
+  { code: "USD", label: "US Dollar", idrPerUnit: 17_908 },
+  { code: "EUR", label: "Euro", idrPerUnit: 20_672 },
+  { code: "SGD", label: "Singapore Dollar", idrPerUnit: 13_966 },
+  { code: "MYR", label: "Malaysian Ringgit", idrPerUnit: 4_379 },
+  { code: "JPY", label: "Japanese Yen", idrPerUnit: 113 },
+  { code: "GBP", label: "British Pound", idrPerUnit: 24_113 },
+  { code: "AUD", label: "Australian Dollar", idrPerUnit: 12_611 },
 ];
 
 export function getCurrency(code: string): CurrencyDef {
