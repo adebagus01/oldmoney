@@ -10,6 +10,7 @@ import { NoteField } from "@/components/note-field";
 import { DateField } from "@/components/date-field";
 import { TransactionList } from "@/components/transaction-list";
 import { useToast } from "@/components/toast-provider";
+import { useCurrency } from "@/components/currency-provider";
 import type { PaymentMethod } from "@/lib/payment-methods";
 import type { Category, Transaction, TransactionType } from "@/lib/types";
 
@@ -34,6 +35,7 @@ export default function AddPage() {
   const [error, setError] = useState<string | null>(null);
   const amountRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  const { format } = useCurrency();
 
   const categoriesForType = useMemo(
     () => categories.filter((c) => c.type === type),
@@ -101,13 +103,18 @@ export default function AddPage() {
         const body = await res.json();
         throw new Error(body.error ?? "Failed to save");
       }
+      const savedAmount = amount;
       setAmount("");
       setNote("");
       setPaymentMethod(null);
       setDate(todayIso());
       await loadRecent();
       amountRef.current?.focus();
-      toast(type === "expense" ? "Expense added" : "Income added");
+      const sign = type === "expense" ? "-" : "+";
+      toast(
+        `${type === "expense" ? "Expense" : "Income"} added: ${sign}${format(savedAmount)}`,
+        { tone: type === "expense" ? "negative" : "positive" }
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
     } finally {

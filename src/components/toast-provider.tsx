@@ -1,11 +1,15 @@
 "use client";
 
 import { createContext, useCallback, useContext, useRef, useState } from "react";
+import { clsx } from "clsx";
+
+type ToastTone = "neutral" | "positive" | "negative";
 
 type ToastOptions = {
   actionLabel?: string;
   onAction?: () => void;
   duration?: number;
+  tone?: ToastTone;
 };
 
 type ToastState = {
@@ -13,6 +17,7 @@ type ToastState = {
   message: string;
   actionLabel?: string;
   onAction?: () => void;
+  tone: ToastTone;
 };
 
 type ToastContextValue = {
@@ -22,6 +27,12 @@ type ToastContextValue = {
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 const DEFAULT_DURATION = 4000;
+
+const TONE_CLASSES: Record<ToastTone, string> = {
+  neutral: "border-border bg-surface-raised text-text-primary",
+  positive: "border-positive/30 bg-positive/10 text-positive",
+  negative: "border-negative/30 bg-negative/10 text-negative",
+};
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [current, setCurrent] = useState<ToastState | null>(null);
@@ -41,6 +52,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       message,
       actionLabel: options?.actionLabel,
       onAction: options?.onAction,
+      tone: options?.tone ?? "neutral",
     });
     timeoutRef.current = setTimeout(() => {
       setCurrent((c) => (c?.id === id ? null : c));
@@ -52,8 +64,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       {current ? (
         <div className="pointer-events-none fixed inset-x-0 bottom-20 z-50 flex justify-center px-4 md:bottom-6">
-          <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-border bg-surface-raised px-4 py-2.5 shadow-lg">
-            <span className="text-sm text-text-primary">{current.message}</span>
+          <div
+            className={clsx(
+              "pointer-events-auto flex items-center gap-3 rounded-full border px-4 py-2.5 shadow-lg",
+              TONE_CLASSES[current.tone]
+            )}
+          >
+            <span className="text-sm font-medium">{current.message}</span>
             {current.onAction ? (
               <button
                 type="button"
@@ -61,7 +78,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   current.onAction?.();
                   dismiss();
                 }}
-                className="text-sm font-semibold text-accent"
+                className={clsx(
+                  "text-sm font-semibold",
+                  current.tone === "neutral" ? "text-accent" : "underline underline-offset-2"
+                )}
               >
                 {current.actionLabel ?? "Undo"}
               </button>
