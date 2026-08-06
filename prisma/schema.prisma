@@ -1,0 +1,42 @@
+// Prisma schema for Old Money — a personal money tracking dashboard.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum TransactionType {
+  expense
+  income
+}
+
+model Category {
+  id           String            @id @default(uuid())
+  name         String
+  type         TransactionType
+  color        String
+  isDefault    Boolean           @default(false)
+  isFallback   Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+  transactions Transaction[]
+}
+
+model Transaction {
+  id         String           @id @default(uuid())
+  type       TransactionType
+  amount     BigInt
+  note       String?
+  occurredAt DateTime
+  createdAt  DateTime         @default(now())
+  category   Category         @relation(fields: [categoryId], references: [id])
+  categoryId String
+}
+
+model Setting {
+  key   String @id
+  value String
+}
