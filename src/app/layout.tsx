@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { CurrencyProvider } from "@/components/currency-provider";
 import { AppShell } from "@/components/app-shell";
 import "./globals.css";
 
@@ -42,7 +43,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           defaultTheme="dark"
           enableSystem={false}
         >
-          <AppShell>{children}</AppShell>
+          <CurrencyProvider>
+            <AppShell>{children}</AppShell>
+          </CurrencyProvider>
         </ThemeProvider>
       </body>
     </html>

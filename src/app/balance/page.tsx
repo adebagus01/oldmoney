@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { formatIDR } from "@/lib/money";
 import { currentMonthKey, monthKeyLabel, shiftMonthKey } from "@/lib/money";
+import { useCurrency } from "@/components/currency-provider";
 import { LifetimeCard } from "@/components/lifetime-card";
 import { CategoryBreakdown } from "@/components/category-breakdown";
 import { DailyTrendChart } from "@/components/daily-trend-chart";
@@ -13,6 +13,7 @@ export default function BalancePage() {
   const [month, setMonth] = useState(currentMonthKey());
   const [data, setData] = useState<BalanceResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const { format } = useCurrency();
 
   useEffect(() => {
     setLoading(true);
@@ -68,20 +69,20 @@ export default function BalancePage() {
               <div>
                 <div className="text-xs text-text-muted">Income</div>
                 <div className="tabular-nums text-xl font-semibold text-positive">
-                  {formatIDR(BigInt(data.monthly.income))}
+                  {format(data.monthly.income)}
                 </div>
               </div>
               <div>
                 <div className="text-xs text-text-muted">Expenses</div>
                 <div className="tabular-nums text-xl font-semibold text-negative">
-                  {formatIDR(BigInt(data.monthly.expenses))}
+                  {format(data.monthly.expenses)}
                 </div>
               </div>
             </div>
             <div className="border-t border-border pt-4">
               <div className="text-xs text-text-muted">Remaining</div>
               <div className="tabular-nums text-3xl font-bold text-text-primary">
-                {formatIDR(BigInt(data.monthly.remaining))}
+                {format(data.monthly.remaining)}
               </div>
             </div>
           </section>

@@ -1,6 +1,6 @@
 "use client";
 
-import { formatIDR } from "@/lib/money";
+import { useCurrency } from "@/components/currency-provider";
 import type { Transaction } from "@/lib/types";
 import { Trash2 } from "lucide-react";
 
@@ -21,6 +21,8 @@ export function TransactionList({
   onDelete?: (id: string) => void;
   emptyMessage?: string;
 }) {
+  const { format } = useCurrency();
+
   if (transactions.length === 0) {
     return (
       <p className="py-8 text-center text-sm text-text-muted">
@@ -55,7 +57,7 @@ export function TransactionList({
             }`}
           >
             {t.type === "income" ? "+" : "-"}
-            {formatIDR(BigInt(t.amount))}
+            {format(t.amount)}
           </div>
           {onDelete ? (
             <button

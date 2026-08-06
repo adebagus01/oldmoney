@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { formatIDR } from "@/lib/money";
+import { useCurrency } from "@/components/currency-provider";
 
 function dayLabel(iso: string): string {
   return String(Number(iso.slice(8, 10)));
@@ -20,6 +20,7 @@ export function DailyTrendChart({
 }: {
   data: { date: string; total: string }[];
 }) {
+  const { format } = useCurrency();
   const max = useMemo(
     () => Math.max(...data.map((d) => Number(d.total)), 1),
     [data]
@@ -46,7 +47,7 @@ export function DailyTrendChart({
             <div key={d.date} className="group relative flex h-full flex-1">
               <div
                 tabIndex={0}
-                aria-label={`${fullDateLabel(d.date)}: ${formatIDR(BigInt(d.total))}`}
+                aria-label={`${fullDateLabel(d.date)}: ${format(d.total)}`}
                 className="mt-auto w-full rounded-t-[4px] bg-negative/35 outline-none transition-colors hover:bg-negative focus:bg-negative"
                 style={{ height: `${pct}%` }}
               />
@@ -54,7 +55,7 @@ export function DailyTrendChart({
                 className={`pointer-events-none absolute bottom-full z-10 mb-2 whitespace-nowrap rounded-md border border-border bg-surface-raised px-2 py-1 text-xs opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-within:opacity-100 ${tooltipAlign}`}
               >
                 <div className="tabular-nums font-semibold text-text-primary">
-                  {formatIDR(BigInt(d.total))}
+                  {format(d.total)}
                 </div>
                 <div className="text-text-muted">{fullDateLabel(d.date)}</div>
               </div>

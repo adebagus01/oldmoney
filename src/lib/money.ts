@@ -1,11 +1,3 @@
-export function formatIDR(amount: number | bigint): string {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(Number(amount));
-}
-
 export function toMonthRange(monthKey: string): { start: Date; end: Date } {
   // monthKey format: "YYYY-MM"
   const [year, month] = monthKey.split("-").map(Number);

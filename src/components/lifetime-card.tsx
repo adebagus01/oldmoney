@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Infinity as InfinityIcon, Wallet, TrendingUp, TrendingDown, ChevronUp, ChevronDown } from "lucide-react";
-import { formatIDR } from "@/lib/money";
+import { useCurrency } from "@/components/currency-provider";
 
 export function LifetimeCard({
   income,
@@ -14,6 +14,7 @@ export function LifetimeCard({
   net: string;
 }) {
   const [open, setOpen] = useState(true);
+  const { format } = useCurrency();
 
   const incomeNum = Number(income);
   const netNum = Number(net);
@@ -51,7 +52,7 @@ export function LifetimeCard({
               Net balance · all time
             </div>
             <div className="tabular-nums text-3xl font-bold text-text-primary">
-              {formatIDR(BigInt(net))}
+              {format(net)}
             </div>
             <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-raised">
               <div
@@ -73,7 +74,7 @@ export function LifetimeCard({
                 Income
               </div>
               <div className="tabular-nums text-lg font-semibold text-positive">
-                {formatIDR(BigInt(income))}
+                {format(income)}
               </div>
             </div>
             <div className="rounded-xl border border-border bg-surface-raised p-3.5">
@@ -82,7 +83,7 @@ export function LifetimeCard({
                 Expenses
               </div>
               <div className="tabular-nums text-lg font-semibold text-negative">
-                {formatIDR(BigInt(expenses))}
+                {format(expenses)}
               </div>
             </div>
           </div>

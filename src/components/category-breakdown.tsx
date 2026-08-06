@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { formatIDR } from "@/lib/money";
+import { useCurrency } from "@/components/currency-provider";
 import type { CategoryTotal } from "@/lib/types";
 
 export function CategoryBreakdown({
@@ -11,6 +11,7 @@ export function CategoryBreakdown({
   breakdown: CategoryTotal[];
   emptyMessage?: string;
 }) {
+  const { format } = useCurrency();
   const max = useMemo(
     () => Math.max(...breakdown.map((b) => Number(b.total)), 1),
     [breakdown]
@@ -33,7 +34,7 @@ export function CategoryBreakdown({
               {b.category.name}
             </span>
             <span className="tabular-nums text-text-muted">
-              {formatIDR(BigInt(b.total))}
+              {format(b.total)}
             </span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-surface-raised">

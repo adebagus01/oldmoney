@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { Trash2 } from "lucide-react";
-import { formatIDR } from "@/lib/money";
+import { useCurrency } from "@/components/currency-provider";
 import type { Transaction } from "@/lib/types";
 
 function dayLabel(iso: string): string {
@@ -23,6 +23,8 @@ export function DailyGroupedTransactions({
   onDelete?: (id: string) => void;
   emptyMessage?: string;
 }) {
+  const { format } = useCurrency();
+
   const groups = useMemo(() => {
     const map = new Map<string, Transaction[]>();
     for (const t of transactions) {
@@ -52,7 +54,7 @@ export function DailyGroupedTransactions({
                 {dayLabel(day)}
               </span>
               <span className="tabular-nums text-xs text-text-muted">
-                {formatIDR(dayTotal)}
+                {format(dayTotal)}
               </span>
             </div>
             <ul className="divide-y divide-border rounded-xl border border-border bg-surface">
@@ -79,7 +81,7 @@ export function DailyGroupedTransactions({
                     }`}
                   >
                     {t.type === "income" ? "+" : "-"}
-                    {formatIDR(BigInt(t.amount))}
+                    {format(t.amount)}
                   </div>
                   {onDelete ? (
                     <button

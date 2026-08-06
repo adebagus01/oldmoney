@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { clsx } from "clsx";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { formatIDR, currentMonthKey, monthKeyLabel, shiftMonthKey, toMonthRange } from "@/lib/money";
+import { currentMonthKey, monthKeyLabel, shiftMonthKey, toMonthRange } from "@/lib/money";
+import { useCurrency } from "@/components/currency-provider";
 import { DailyGroupedTransactions } from "@/components/daily-grouped-transactions";
 import { CategoryBreakdown } from "@/components/category-breakdown";
 import type { Category, ReportResponse, TransactionType } from "@/lib/types";
@@ -18,6 +19,7 @@ export default function ReportsPage() {
   const [sort, setSort] = useState<SortKey>("date_desc");
   const [data, setData] = useState<ReportResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const { format } = useCurrency();
 
   const isCurrentMonth = month === currentMonthKey();
 
@@ -136,7 +138,7 @@ export default function ReportsPage() {
                 type === "expense" ? "text-negative" : "text-positive"
               )}
             >
-              {formatIDR(BigInt(data.total))}
+              {format(data.total)}
             </div>
           </div>
 
