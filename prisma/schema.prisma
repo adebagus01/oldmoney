@@ -26,14 +26,15 @@ model Category {
 }
 
 model Transaction {
-  id         String           @id @default(uuid())
-  type       TransactionType
-  amount     BigInt
-  note       String?
-  occurredAt DateTime
-  createdAt  DateTime         @default(now())
-  category   Category         @relation(fields: [categoryId], references: [id])
-  categoryId String
+  id            String           @id @default(uuid())
+  type          TransactionType
+  amount        BigInt
+  note          String?
+  paymentMethod String?
+  occurredAt    DateTime
+  createdAt     DateTime         @default(now())
+  category      Category         @relation(fields: [categoryId], references: [id])
+  categoryId    String
 }
 
 model Setting {

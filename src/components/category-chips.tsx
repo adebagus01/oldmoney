@@ -13,7 +13,7 @@ export function CategoryChips({
   onSelect: (id: string) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="grid grid-cols-3 gap-2">
       {categories.map((cat) => {
         const active = cat.id === selectedId;
         return (
@@ -22,17 +22,17 @@ export function CategoryChips({
             type="button"
             onClick={() => onSelect(cat.id)}
             className={clsx(
-              "flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium transition-colors",
+              "flex items-center justify-center gap-2 rounded-xl border px-2 py-3 text-sm font-medium transition-colors",
               active
-                ? "border-transparent bg-surface-raised text-text-primary ring-2 ring-accent"
+                ? "border-accent bg-accent/10 text-text-primary"
                 : "border-border text-text-muted hover:text-text-primary"
             )}
           >
             <span
-              className="h-2.5 w-2.5 rounded-full"
+              className="h-2 w-2 shrink-0 rounded-full"
               style={{ backgroundColor: cat.color }}
             />
-            {cat.name}
+            <span className="truncate">{cat.name}</span>
           </button>
         );
       })}

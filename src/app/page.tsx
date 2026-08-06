@@ -2,9 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { clsx } from "clsx";
+import { Calendar } from "lucide-react";
 import { AmountInput } from "@/components/amount-input";
 import { CategoryChips } from "@/components/category-chips";
+import { PaymentMethodPicker } from "@/components/payment-method-picker";
+import { SectionLabel } from "@/components/section-label";
 import { TransactionList } from "@/components/transaction-list";
+import type { PaymentMethod } from "@/lib/payment-methods";
 import type { Category, Transaction, TransactionType } from "@/lib/types";
 
 function todayIso(): string {
@@ -21,6 +25,7 @@ export default function AddPage() {
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
   const [date, setDate] = useState(todayIso());
   const [recent, setRecent] = useState<Transaction[]>([]);
   const [saving, setSaving] = useState(false);
@@ -59,6 +64,7 @@ export default function AddPage() {
 
   useEffect(() => {
     amountRef.current?.focus();
+    if (type === "income") setPaymentMethod(null);
   }, [type]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -84,6 +90,7 @@ export default function AddPage() {
           amount,
           categoryId,
           note,
+          paymentMethod: type === "expense" ? paymentMethod : null,
           occurredAt: date,
         }),
       });
@@ -93,6 +100,7 @@ export default function AddPage() {
       }
       setAmount("");
       setNote("");
+      setPaymentMethod(null);
       setDate(todayIso());
       await loadRecent();
       amountRef.current?.focus();
@@ -147,7 +155,21 @@ export default function AddPage() {
           positive={type === "income"}
         />
 
+        <div className="mt-6 mb-5">
+          <SectionLabel>Note</SectionLabel>
+          <input
+            type="text"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder={
+              type === "expense" ? "What did you buy? (optional)" : "What was it for? (optional)"
+            }
+            className="w-full rounded-xl border border-border bg-surface px-4 py-3.5 text-base text-text-primary placeholder:text-text-muted outline-none focus:border-accent md:text-sm"
+          />
+        </div>
+
         <div className="mb-5">
+          <SectionLabel>Category</SectionLabel>
           <CategoryChips
             categories={categoriesForType}
             selectedId={categoryId}
@@ -155,20 +177,27 @@ export default function AddPage() {
           />
         </div>
 
-        <div className="mb-5 grid grid-cols-2 gap-3">
-          <input
-            type="text"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="Note (optional)"
-            className="rounded-lg border border-border bg-surface px-3.5 py-2.5 text-base text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-accent md:text-sm"
-          />
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="rounded-lg border border-border bg-surface px-3.5 py-2.5 text-base text-text-primary outline-none focus:ring-2 focus:ring-accent md:text-sm"
-          />
+        {type === "expense" ? (
+          <div className="mb-5">
+            <SectionLabel>Payment method</SectionLabel>
+            <PaymentMethodPicker selected={paymentMethod} onSelect={setPaymentMethod} />
+          </div>
+        ) : null}
+
+        <div className="mb-6">
+          <SectionLabel>Date</SectionLabel>
+          <div className="relative">
+            <Calendar
+              size={17}
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-text-muted"
+            />
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full rounded-xl border border-border bg-surface py-3.5 pl-11 pr-4 text-base text-text-primary outline-none focus:border-accent md:text-sm"
+            />
+          </div>
         </div>
 
         {error ? (

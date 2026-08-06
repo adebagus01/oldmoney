@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
       amount: t.amount,
       category: t.category.name,
       note: t.note ?? "",
+      paymentMethod: t.paymentMethod ?? "",
       occurredAt: t.occurredAt.toISOString().slice(0, 10),
       createdAt: t.createdAt.toISOString(),
     }));

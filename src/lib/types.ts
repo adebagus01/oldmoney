@@ -14,6 +14,7 @@ export type Transaction = {
   type: TransactionType;
   amount: string;
   note: string | null;
+  paymentMethod: string | null;
   occurredAt: string;
   createdAt: string;
   categoryId: string;

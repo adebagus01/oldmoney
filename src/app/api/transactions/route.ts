@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { serializeTransaction } from "@/lib/serialize";
+import { isPaymentMethod } from "@/lib/payment-methods";
 import type { Prisma } from "@/generated/prisma/client";
 
 export async function GET(req: NextRequest) {
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { type, amount, categoryId, note, occurredAt } = body;
+  const { type, amount, categoryId, note, occurredAt, paymentMethod } = body;
 
   if (type !== "expense" && type !== "income") {
     return NextResponse.json({ error: "Invalid type" }, { status: 400 });
@@ -71,6 +72,7 @@ export async function POST(req: NextRequest) {
       amount: BigInt(amountNum),
       categoryId,
       note: typeof note === "string" && note.trim() ? note.trim() : null,
+      paymentMethod: isPaymentMethod(paymentMethod) ? paymentMethod : null,
       occurredAt: occurredAt ? new Date(occurredAt) : new Date(),
     },
     include: { category: true },

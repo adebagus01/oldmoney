@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { serializeTransaction } from "@/lib/serialize";
+import { isPaymentMethod } from "@/lib/payment-methods";
 
 export async function DELETE(
   req: NextRequest,
@@ -20,6 +21,7 @@ export async function PATCH(
   const data: {
     amount?: bigint;
     note?: string | null;
+    paymentMethod?: string | null;
     occurredAt?: Date;
     categoryId?: string;
   } = {};
@@ -35,6 +37,9 @@ export async function PATCH(
     data.amount = BigInt(amountNum);
   }
   if (typeof body.note === "string") data.note = body.note.trim() || null;
+  if (body.paymentMethod !== undefined) {
+    data.paymentMethod = isPaymentMethod(body.paymentMethod) ? body.paymentMethod : null;
+  }
   if (body.occurredAt) data.occurredAt = new Date(body.occurredAt);
   if (typeof body.categoryId === "string") data.categoryId = body.categoryId;
 

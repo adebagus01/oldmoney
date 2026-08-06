@@ -44,7 +44,10 @@ export function TransactionList({
                 <span className="font-normal text-text-muted"> · {t.note}</span>
               ) : null}
             </div>
-            <div className="text-xs text-text-muted">{formatDate(t.occurredAt)}</div>
+            <div className="text-xs text-text-muted">
+              {formatDate(t.occurredAt)}
+              {t.paymentMethod ? ` · ${t.paymentMethod}` : ""}
+            </div>
           </div>
           <div
             className={`tabular-nums shrink-0 text-sm font-semibold ${
