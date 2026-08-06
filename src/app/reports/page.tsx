@@ -1,15 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { clsx } from "clsx";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { currentMonthKey, monthKeyLabel, shiftMonthKey, toMonthRange } from "@/lib/money";
 import { useCurrency } from "@/components/currency-provider";
+import { useToast } from "@/components/toast-provider";
 import { DailyGroupedTransactions } from "@/components/daily-grouped-transactions";
 import { CategoryBreakdown } from "@/components/category-breakdown";
-import type { Category, ReportResponse, TransactionType } from "@/lib/types";
+import { EditTransactionModal } from "@/components/edit-transaction-modal";
+import type { Category, CategoryTotal, ReportResponse, Transaction, TransactionType } from "@/lib/types";
 
 type SortKey = "date_desc" | "date_asc" | "amount_desc" | "amount_asc";
+
+const DELETE_UNDO_WINDOW_MS = 4000;
 
 export default function ReportsPage() {
   const [type, setType] = useState<TransactionType>("expense");
@@ -19,7 +23,11 @@ export default function ReportsPage() {
   const [sort, setSort] = useState<SortKey>("date_desc");
   const [data, setData] = useState<ReportResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<string>>(new Set());
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const deleteTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const { format } = useCurrency();
+  const { toast } = useToast();
 
   const isCurrentMonth = month === currentMonthKey();
 
@@ -30,8 +38,9 @@ export default function ReportsPage() {
       .then(setCategories);
   }, [type]);
 
-  useEffect(() => {
+  const loadReport = useCallback(() => {
     setLoading(true);
+    setPendingDeleteIds(new Set());
     const { start, end } = toMonthRange(month);
     const params = new URLSearchParams({
       type,
@@ -40,11 +49,74 @@ export default function ReportsPage() {
       to: end.toISOString().slice(0, 10),
     });
     if (categoryId) params.set("categoryId", categoryId);
-    fetch(`/api/reports?${params}`)
+    return fetch(`/api/reports?${params}`)
       .then((res) => res.json())
       .then(setData)
       .finally(() => setLoading(false));
   }, [type, month, categoryId, sort]);
+
+  useEffect(() => {
+    loadReport();
+  }, [loadReport]);
+
+  const visibleTransactions = useMemo(
+    () => data?.transactions.filter((t) => !pendingDeleteIds.has(t.id)) ?? [],
+    [data, pendingDeleteIds]
+  );
+
+  const total = useMemo(
+    () => visibleTransactions.reduce((sum, t) => sum + BigInt(t.amount), 0n).toString(),
+    [visibleTransactions]
+  );
+
+  const breakdown = useMemo<CategoryTotal[]>(() => {
+    const map = new Map<string, { category: Category; total: bigint }>();
+    for (const t of visibleTransactions) {
+      const existing = map.get(t.category.id);
+      if (existing) existing.total += BigInt(t.amount);
+      else map.set(t.category.id, { category: t.category, total: BigInt(t.amount) });
+    }
+    return Array.from(map.values())
+      .map((b) => ({ category: b.category, total: b.total.toString() }))
+      .sort((a, b) => (BigInt(b.total) > BigInt(a.total) ? 1 : -1));
+  }, [visibleTransactions]);
+
+  function handleDelete(id: string) {
+    const target = data?.transactions.find((t) => t.id === id);
+    if (!target) return;
+
+    setPendingDeleteIds((prev) => new Set(prev).add(id));
+
+    const timer = setTimeout(async () => {
+      deleteTimers.current.delete(id);
+      await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+    }, DELETE_UNDO_WINDOW_MS);
+    deleteTimers.current.set(id, timer);
+
+    const label = target.note ? `${target.category.name} · ${target.note}` : target.category.name;
+    toast(`Deleted "${label}"`, {
+      actionLabel: "Undo",
+      duration: DELETE_UNDO_WINDOW_MS,
+      onAction: () => {
+        const pendingTimer = deleteTimers.current.get(id);
+        if (pendingTimer) {
+          clearTimeout(pendingTimer);
+          deleteTimers.current.delete(id);
+        }
+        setPendingDeleteIds((prev) => {
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+      },
+    });
+  }
+
+  async function handleSaved() {
+    setEditingTransaction(null);
+    await loadReport();
+    toast("Changes saved");
+  }
 
   return (
     <div className="mx-auto max-w-2xl px-5 py-6 md:py-10">
@@ -138,16 +210,16 @@ export default function ReportsPage() {
                 type === "expense" ? "text-negative" : "text-positive"
               )}
             >
-              {format(data.total)}
+              {format(total)}
             </div>
           </div>
 
-          {data.breakdown.length > 0 ? (
+          {breakdown.length > 0 ? (
             <div className="mb-8">
               <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-text-muted">
                 By category
               </h2>
-              <CategoryBreakdown breakdown={data.breakdown} />
+              <CategoryBreakdown breakdown={breakdown} />
             </div>
           ) : null}
 
@@ -155,11 +227,21 @@ export default function ReportsPage() {
             Transactions
           </h2>
           <DailyGroupedTransactions
-            transactions={data.transactions}
+            transactions={visibleTransactions}
+            onEdit={setEditingTransaction}
+            onDelete={handleDelete}
             emptyMessage={`No ${type === "expense" ? "expenses" : "income"} this month.`}
           />
         </>
       )}
+
+      {editingTransaction ? (
+        <EditTransactionModal
+          transaction={editingTransaction}
+          onClose={() => setEditingTransaction(null)}
+          onSaved={handleSaved}
+        />
+      ) : null}
     </div>
   );
 }

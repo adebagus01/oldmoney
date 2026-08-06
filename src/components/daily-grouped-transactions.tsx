@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
 import { useCurrency } from "@/components/currency-provider";
 import type { Transaction } from "@/lib/types";
 
@@ -16,10 +16,12 @@ function dayLabel(iso: string): string {
 
 export function DailyGroupedTransactions({
   transactions,
+  onEdit,
   onDelete,
   emptyMessage = "No transactions yet.",
 }: {
   transactions: Transaction[];
+  onEdit?: (t: Transaction) => void;
   onDelete?: (id: string) => void;
   emptyMessage?: string;
 }) {
@@ -83,6 +85,16 @@ export function DailyGroupedTransactions({
                     {t.type === "income" ? "+" : "-"}
                     {format(t.amount)}
                   </div>
+                  {onEdit ? (
+                    <button
+                      type="button"
+                      onClick={() => onEdit(t)}
+                      className="shrink-0 rounded-md p-1.5 text-text-muted transition-colors hover:text-text-primary"
+                      aria-label="Edit transaction"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                  ) : null}
                   {onDelete ? (
                     <button
                       type="button"

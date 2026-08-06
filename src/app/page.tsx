@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { clsx } from "clsx";
-import { Calendar } from "lucide-react";
 import { AmountInput } from "@/components/amount-input";
 import { CategoryChips } from "@/components/category-chips";
 import { PaymentMethodPicker } from "@/components/payment-method-picker";
 import { SectionLabel } from "@/components/section-label";
+import { NoteField } from "@/components/note-field";
+import { DateField } from "@/components/date-field";
 import { TransactionList } from "@/components/transaction-list";
 import type { PaymentMethod } from "@/lib/payment-methods";
 import type { Category, Transaction, TransactionType } from "@/lib/types";
@@ -156,13 +157,10 @@ export default function AddPage() {
         />
 
         <div className="mt-6 mb-5">
-          <SectionLabel>Note</SectionLabel>
-          <input
-            type="text"
+          <NoteField
             value={note}
-            onChange={(e) => setNote(e.target.value)}
+            onChange={setNote}
             placeholder={type === "expense" ? "What did you buy? (optional)" : "(optional)"}
-            className="w-full rounded-xl border border-border bg-surface px-4 py-3.5 text-base text-text-primary placeholder:text-text-muted outline-none focus:border-accent md:text-sm"
           />
         </div>
 
@@ -183,19 +181,7 @@ export default function AddPage() {
         ) : null}
 
         <div className="mb-6">
-          <SectionLabel>Date</SectionLabel>
-          <div className="relative w-full max-w-full overflow-hidden rounded-xl border border-border bg-surface">
-            <Calendar
-              size={17}
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-text-muted"
-            />
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="block w-full min-w-0 max-w-full appearance-none border-0 bg-transparent py-3.5 pl-11 pr-4 text-base text-text-primary outline-none focus:border-accent md:text-sm"
-            />
-          </div>
+          <DateField value={date} onChange={setDate} />
         </div>
 
         {error ? (

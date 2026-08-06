@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { CurrencyProvider } from "@/components/currency-provider";
+import { ToastProvider } from "@/components/toast-provider";
 import { AppShell } from "@/components/app-shell";
 import "./globals.css";
 
@@ -44,7 +45,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           enableSystem={false}
         >
           <CurrencyProvider>
-            <AppShell>{children}</AppShell>
+            <ToastProvider>
+              <AppShell>{children}</AppShell>
+            </ToastProvider>
           </CurrencyProvider>
         </ThemeProvider>
       </body>
