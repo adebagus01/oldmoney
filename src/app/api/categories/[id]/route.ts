@@ -37,14 +37,21 @@ export async function DELETE(
     );
   }
 
-  const fallback = await prisma.category.findFirst({
+  let fallback = await prisma.category.findFirst({
     where: { type: category.type, isFallback: true },
   });
   if (!fallback) {
-    return NextResponse.json(
-      { error: "No fallback category found" },
-      { status: 500 }
-    );
+    // Normally seeded up front, but self-heal if it's missing (e.g. a
+    // database that was never seeded) rather than blocking deletion.
+    fallback = await prisma.category.create({
+      data: {
+        name: "Uncategorised",
+        type: category.type,
+        color: "#6b7280",
+        isDefault: true,
+        isFallback: true,
+      },
+    });
   }
 
   await prisma.$transaction([
