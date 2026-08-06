@@ -161,13 +161,13 @@ export default function AddPage() {
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Note (optional)"
-            className="rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-accent"
+            className="rounded-lg border border-border bg-surface px-3.5 py-2.5 text-base text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-accent md:text-sm"
           />
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="rounded-lg border border-border bg-surface px-3.5 py-2.5 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent"
+            className="rounded-lg border border-border bg-surface px-3.5 py-2.5 text-base text-text-primary outline-none focus:ring-2 focus:ring-accent md:text-sm"
           />
         </div>
 

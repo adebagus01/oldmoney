@@ -66,7 +66,7 @@ export default function ReportsPage() {
               type="date"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent"
+              className="rounded-lg border border-border bg-surface px-3 py-2 text-base text-text-primary outline-none focus:ring-2 focus:ring-accent md:text-sm"
             />
           </label>
           <label className="flex flex-col gap-1">
@@ -75,7 +75,7 @@ export default function ReportsPage() {
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent"
+              className="rounded-lg border border-border bg-surface px-3 py-2 text-base text-text-primary outline-none focus:ring-2 focus:ring-accent md:text-sm"
             />
           </label>
         </div>
@@ -92,7 +92,7 @@ export default function ReportsPage() {
           <select
             value={categoryId}
             onChange={(e) => setCategoryId(e.target.value)}
-            className="rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-primary outline-none"
+            className="rounded-full border border-border bg-surface px-3 py-1.5 text-base font-medium text-text-primary outline-none md:text-xs"
           >
             <option value="">All categories</option>
             {categories.map((c) => (
@@ -105,7 +105,7 @@ export default function ReportsPage() {
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
-            className="rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-medium text-text-primary outline-none"
+            className="rounded-full border border-border bg-surface px-3 py-1.5 text-base font-medium text-text-primary outline-none md:text-xs"
           >
             <option value="date_desc">Newest first</option>
             <option value="date_asc">Oldest first</option>

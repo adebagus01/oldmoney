@@ -100,7 +100,7 @@ export function CategoryManager({ type }: { type: TransactionType }) {
                 <input
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="flex-1 rounded-md border border-border bg-transparent px-2 py-1 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent"
+                  className="flex-1 rounded-md border border-border bg-transparent px-2 py-1 text-base text-text-primary outline-none focus:ring-2 focus:ring-accent md:text-sm"
                   autoFocus
                 />
                 <button
@@ -169,7 +169,7 @@ export function CategoryManager({ type }: { type: TransactionType }) {
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder={`New ${type} category`}
-          className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-accent"
+          className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-base text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-accent md:text-sm"
         />
         <button
           type="submit"
