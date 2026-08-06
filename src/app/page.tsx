@@ -161,9 +161,7 @@ export default function AddPage() {
             type="text"
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder={
-              type === "expense" ? "What did you buy? (optional)" : "What was it for? (optional)"
-            }
+            placeholder={type === "expense" ? "What did you buy? (optional)" : "(optional)"}
             className="w-full rounded-xl border border-border bg-surface px-4 py-3.5 text-base text-text-primary placeholder:text-text-muted outline-none focus:border-accent md:text-sm"
           />
         </div>
