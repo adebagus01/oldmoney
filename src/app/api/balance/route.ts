@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMonthKey, shiftMonthKey, toMonthRange } from "@/lib/money";
+import { serializeTransaction } from "@/lib/serialize";
 
 async function sumByType(
   type: "expense" | "income",
@@ -38,6 +39,7 @@ export async function GET(req: NextRequest) {
     monthlyExpenseTx,
     categoryTotals,
     prevMonthlyExpenses,
+    topExpenses,
   ] = await Promise.all([
     sumByType("income", range),
     sumByType("expense", range),
@@ -59,6 +61,15 @@ export async function GET(req: NextRequest) {
       _sum: { amount: true },
     }),
     sumByType("expense", prevRange),
+    prisma.transaction.findMany({
+      where: {
+        type: "expense",
+        occurredAt: { gte: range.start, lt: range.end },
+      },
+      include: { category: true },
+      orderBy: { amount: "desc" },
+      take: 5,
+    }),
   ]);
 
   const monthlyRemaining = monthlyIncome - monthlyExpenses;
@@ -131,5 +142,6 @@ export async function GET(req: NextRequest) {
     },
     categoryBreakdown,
     dailyExpenses,
+    topExpenses: topExpenses.map(serializeTransaction),
   });
 }

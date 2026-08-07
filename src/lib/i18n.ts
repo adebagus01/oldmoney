@@ -68,6 +68,8 @@ const dict = {
       id: "Kamu menyimpan {pct}% dari semua yang kamu hasilkan",
     },
     noIncomeYet: { en: "No income recorded yet", id: "Belum ada pemasukan tercatat" },
+    topExpenses: { en: "Top 5 spent this month", id: "5 Pengeluaran Terbesar Bulan Ini" },
+    noTopExpenses: { en: "No expenses this month yet.", id: "Belum ada pengeluaran bulan ini." },
   },
   reports: {
     title: { en: "Reports", id: "Laporan" },

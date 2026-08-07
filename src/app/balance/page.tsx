@@ -10,6 +10,7 @@ import { useLanguage } from "@/components/language-provider";
 import { LifetimeCard } from "@/components/lifetime-card";
 import { CategoryBreakdown } from "@/components/category-breakdown";
 import { DailyTrendChart } from "@/components/daily-trend-chart";
+import { TopExpenses } from "@/components/top-expenses";
 import type { BalanceResponse } from "@/lib/types";
 
 export default function BalancePage() {
@@ -158,6 +159,13 @@ export default function BalancePage() {
             expenses={data.lifetime.expenses}
             net={data.lifetime.net}
           />
+
+          <section className="mt-6 rounded-2xl border border-border bg-surface p-5">
+            <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
+              {t("balance.topExpenses")}
+            </h2>
+            <TopExpenses transactions={data.topExpenses} />
+          </section>
         </>
       ) : (
         <p className="py-8 text-center text-sm text-text-muted">{t("common.loading")}</p>

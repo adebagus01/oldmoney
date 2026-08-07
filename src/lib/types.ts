@@ -36,6 +36,7 @@ export type BalanceResponse = {
   };
   categoryBreakdown: CategoryTotal[];
   dailyExpenses: { date: string; total: string }[];
+  topExpenses: Transaction[];
 };
 
 export type ReportResponse = {
