@@ -2,23 +2,26 @@
 
 import { useMemo } from "react";
 import { useCurrency } from "@/components/currency-provider";
+import { useLanguage } from "@/components/language-provider";
 import type { CategoryTotal } from "@/lib/types";
 
 export function CategoryBreakdown({
   breakdown,
-  emptyMessage = "Nothing to break down yet.",
+  emptyMessage,
 }: {
   breakdown: CategoryTotal[];
   emptyMessage?: string;
 }) {
   const { format } = useCurrency();
+  const { t } = useLanguage();
+  const resolvedEmptyMessage = emptyMessage ?? t("reports.noBreakdownYet");
   const max = useMemo(
     () => Math.max(...breakdown.map((b) => Number(b.total)), 1),
     [breakdown]
   );
 
   if (breakdown.length === 0) {
-    return <p className="py-4 text-center text-sm text-text-muted">{emptyMessage}</p>;
+    return <p className="py-4 text-center text-sm text-text-muted">{resolvedEmptyMessage}</p>;
   }
 
   return (

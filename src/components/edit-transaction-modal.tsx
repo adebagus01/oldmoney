@@ -8,6 +8,7 @@ import { PaymentMethodPicker } from "@/components/payment-method-picker";
 import { NoteField } from "@/components/note-field";
 import { DateField } from "@/components/date-field";
 import { SectionLabel } from "@/components/section-label";
+import { useLanguage } from "@/components/language-provider";
 import { isPaymentMethod, type PaymentMethod } from "@/lib/payment-methods";
 import type { Category, Transaction } from "@/lib/types";
 
@@ -20,6 +21,7 @@ export function EditTransactionModal({
   onClose: () => void;
   onSaved: (updated: Transaction) => void;
 }) {
+  const { t } = useLanguage();
   const [categories, setCategories] = useState<Category[]>([]);
   const [amount, setAmount] = useState(transaction.amount);
   const [categoryId, setCategoryId] = useState(transaction.categoryId);
@@ -50,7 +52,7 @@ export function EditTransactionModal({
     setError(null);
 
     if (!amount || Number(amount) <= 0) {
-      setError("Enter an amount greater than zero.");
+      setError(t("add.errorAmount"));
       return;
     }
 
@@ -74,7 +76,7 @@ export function EditTransactionModal({
       const updated: Transaction = await res.json();
       onSaved(updated);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save");
+      setError(err instanceof Error ? err.message : t("add.errorAmount"));
     } finally {
       setSaving(false);
     }
@@ -90,13 +92,13 @@ export function EditTransactionModal({
       <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-t-2xl border border-border bg-surface p-5 md:rounded-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-text-primary">
-            Edit {transaction.type === "expense" ? "expense" : "income"}
+            {transaction.type === "expense" ? t("transaction.editExpense") : t("transaction.editIncome")}
           </h2>
           <button
             type="button"
             onClick={onClose}
             className="rounded-md p-1.5 text-text-muted hover:text-text-primary"
-            aria-label="Close"
+            aria-label={t("transaction.close")}
           >
             <X size={18} />
           </button>
@@ -114,13 +116,15 @@ export function EditTransactionModal({
               value={note}
               onChange={setNote}
               placeholder={
-                transaction.type === "expense" ? "What did you buy? (optional)" : "(optional)"
+                transaction.type === "expense"
+                  ? t("add.notePlaceholderExpense")
+                  : t("add.notePlaceholderIncome")
               }
             />
           </div>
 
           <div className="mb-5">
-            <SectionLabel>Category</SectionLabel>
+            <SectionLabel>{t("add.category")}</SectionLabel>
             <CategoryChips
               categories={categories}
               selectedId={categoryId}
@@ -130,7 +134,7 @@ export function EditTransactionModal({
 
           {transaction.type === "expense" ? (
             <div className="mb-5">
-              <SectionLabel>Payment method</SectionLabel>
+              <SectionLabel>{t("add.paymentMethod")}</SectionLabel>
               <PaymentMethodPicker selected={paymentMethod} onSelect={setPaymentMethod} />
             </div>
           ) : null}
@@ -147,14 +151,14 @@ export function EditTransactionModal({
               onClick={onClose}
               className="flex-1 rounded-lg border border-border py-3 text-sm font-semibold text-text-primary"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
             <button
               type="submit"
               disabled={saving}
               className="flex-1 rounded-lg bg-accent py-3 text-sm font-semibold text-accent-foreground transition-opacity disabled:opacity-50"
             >
-              {saving ? "Saving…" : "Save changes"}
+              {saving ? t("add.saving") : t("transaction.saveChanges")}
             </button>
           </div>
         </form>

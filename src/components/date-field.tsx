@@ -2,6 +2,7 @@
 
 import { Calendar } from "lucide-react";
 import { SectionLabel } from "@/components/section-label";
+import { useLanguage } from "@/components/language-provider";
 
 export function DateField({
   value,
@@ -10,9 +11,10 @@ export function DateField({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const { t } = useLanguage();
   return (
     <div>
-      <SectionLabel>Date</SectionLabel>
+      <SectionLabel>{t("add.date")}</SectionLabel>
       <div className="relative w-full max-w-full overflow-hidden rounded-xl border border-border bg-surface">
         <Calendar
           size={17}

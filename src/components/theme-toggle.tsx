@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 import { clsx } from "clsx";
+import { useLanguage } from "@/components/language-provider";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const { t } = useLanguage();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => setMounted(true), []);
@@ -25,7 +27,7 @@ export function ThemeToggle() {
           theme === "dark" ? "bg-surface-raised text-text-primary" : "text-text-muted"
         )}
       >
-        <Moon size={14} /> Dark
+        <Moon size={14} /> {t("settings.dark")}
       </button>
       <button
         type="button"
@@ -35,7 +37,7 @@ export function ThemeToggle() {
           theme === "light" ? "bg-surface-raised text-text-primary" : "text-text-muted"
         )}
       >
-        <Sun size={14} /> Light
+        <Sun size={14} /> {t("settings.light")}
       </button>
     </div>
   );

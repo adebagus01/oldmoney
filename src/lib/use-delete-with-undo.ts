@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useToast } from "@/components/toast-provider";
+import { useLanguage } from "@/components/language-provider";
 import type { Transaction } from "@/lib/types";
 
 const DELETE_UNDO_WINDOW_MS = 4000;
@@ -13,6 +14,7 @@ export function useDeleteWithUndo(transactions: Transaction[]) {
   const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<string>>(new Set());
   const timers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const visibleTransactions = useMemo(
     () => transactions.filter((t) => !pendingDeleteIds.has(t.id)),
@@ -32,8 +34,8 @@ export function useDeleteWithUndo(transactions: Transaction[]) {
       ? `${target.category.name} · ${target.note}`
       : target.category.name;
 
-    toast(`Deleted "${label}"`, {
-      actionLabel: "Undo",
+    toast(`${t("transaction.deletedPrefix")} "${label}"`, {
+      actionLabel: t("common.undo"),
       duration: DELETE_UNDO_WINDOW_MS,
       onAction: () => {
         const pendingTimer = timers.current.get(target.id);

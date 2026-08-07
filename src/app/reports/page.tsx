@@ -4,7 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { clsx } from "clsx";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { currentMonthKey, monthKeyLabel, shiftMonthKey, toMonthRange } from "@/lib/money";
+import { localeFor } from "@/lib/i18n";
 import { useCurrency } from "@/components/currency-provider";
+import { useLanguage } from "@/components/language-provider";
 import { useToast } from "@/components/toast-provider";
 import { useDeleteWithUndo } from "@/lib/use-delete-with-undo";
 import { DailyGroupedTransactions } from "@/components/daily-grouped-transactions";
@@ -24,6 +26,7 @@ export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const { format } = useCurrency();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
   const { visibleTransactions, requestDelete } = useDeleteWithUndo(data?.transactions ?? []);
 
@@ -76,12 +79,12 @@ export default function ReportsPage() {
   async function handleSaved() {
     setEditingTransaction(null);
     await loadReport();
-    toast("Changes saved");
+    toast(t("add.changesSaved"));
   }
 
   return (
     <div className="mx-auto max-w-2xl px-5 py-6 md:py-10">
-      <h1 className="mb-6 text-lg font-semibold text-text-primary">Reports</h1>
+      <h1 className="mb-6 text-lg font-semibold text-text-primary">{t("reports.title")}</h1>
 
       <div className="mb-4 flex justify-center">
         <div className="inline-flex rounded-full border border-border bg-surface p-1">
@@ -93,7 +96,7 @@ export default function ReportsPage() {
               type === "expense" ? "bg-negative/15 text-negative" : "text-text-muted"
             )}
           >
-            Expense
+            {t("add.expense")}
           </button>
           <button
             type="button"
@@ -103,7 +106,7 @@ export default function ReportsPage() {
               type === "income" ? "bg-positive/15 text-positive" : "text-text-muted"
             )}
           >
-            Income
+            {t("add.income")}
           </button>
         </div>
       </div>
@@ -113,19 +116,19 @@ export default function ReportsPage() {
           type="button"
           onClick={() => setMonth((m) => shiftMonthKey(m, -1))}
           className="rounded-md p-1.5 text-text-muted hover:text-text-primary"
-          aria-label="Previous month"
+          aria-label={t("common.previousMonth")}
         >
           <ChevronLeft size={18} />
         </button>
         <span className="text-sm font-semibold text-text-primary">
-          {monthKeyLabel(month)}
+          {monthKeyLabel(month, localeFor(language))}
         </span>
         <button
           type="button"
           onClick={() => setMonth((m) => shiftMonthKey(m, 1))}
           disabled={isCurrentMonth}
           className="rounded-md p-1.5 text-text-muted hover:text-text-primary disabled:opacity-30"
-          aria-label="Next month"
+          aria-label={t("common.nextMonth")}
         >
           <ChevronRight size={18} />
         </button>
@@ -137,7 +140,7 @@ export default function ReportsPage() {
           onChange={(e) => setCategoryId(e.target.value)}
           className="rounded-full border border-border bg-surface px-3 py-1.5 text-base font-medium text-text-primary outline-none md:text-xs"
         >
-          <option value="">All categories</option>
+          <option value="">{t("reports.allCategories")}</option>
           {categories.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -150,20 +153,20 @@ export default function ReportsPage() {
           onChange={(e) => setSort(e.target.value as SortKey)}
           className="rounded-full border border-border bg-surface px-3 py-1.5 text-base font-medium text-text-primary outline-none md:text-xs"
         >
-          <option value="date_desc">Newest first</option>
-          <option value="date_asc">Oldest first</option>
-          <option value="amount_desc">Highest amount</option>
-          <option value="amount_asc">Lowest amount</option>
+          <option value="date_desc">{t("reports.sortNewest")}</option>
+          <option value="date_asc">{t("reports.sortOldest")}</option>
+          <option value="amount_desc">{t("reports.sortHighest")}</option>
+          <option value="amount_asc">{t("reports.sortLowest")}</option>
         </select>
       </div>
 
       {loading || !data ? (
-        <p className="py-8 text-center text-sm text-text-muted">Loading…</p>
+        <p className="py-8 text-center text-sm text-text-muted">{t("common.loading")}</p>
       ) : (
         <>
           <div className="mb-6 rounded-2xl border border-border bg-surface p-5">
             <div className="text-xs text-text-muted">
-              {type === "expense" ? "Total spent" : "Total earned"}
+              {type === "expense" ? t("reports.totalSpent") : t("reports.totalEarned")}
             </div>
             <div
               className={clsx(
@@ -178,20 +181,22 @@ export default function ReportsPage() {
           {breakdown.length > 0 ? (
             <div className="mb-8">
               <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-text-muted">
-                By category
+                {t("reports.byCategory")}
               </h2>
               <CategoryBreakdown breakdown={breakdown} />
             </div>
           ) : null}
 
           <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
-            Transactions
+            {t("reports.transactions")}
           </h2>
           <DailyGroupedTransactions
             transactions={visibleTransactions}
             onEdit={setEditingTransaction}
             onDelete={requestDelete}
-            emptyMessage={`No ${type === "expense" ? "expenses" : "income"} this month.`}
+            emptyMessage={
+              type === "expense" ? t("reports.noExpensesThisMonth") : t("reports.noIncomeThisMonth")
+            }
           />
         </>
       )}

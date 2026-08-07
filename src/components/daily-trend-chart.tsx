@@ -2,13 +2,15 @@
 
 import { useMemo } from "react";
 import { useCurrency } from "@/components/currency-provider";
+import { useLanguage } from "@/components/language-provider";
+import { localeFor } from "@/lib/i18n";
 
 function dayLabel(iso: string): string {
   return String(Number(iso.slice(8, 10)));
 }
 
-function fullDateLabel(iso: string): string {
-  return new Intl.DateTimeFormat("en-US", {
+function fullDateLabel(iso: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
     month: "short",
     day: "numeric",
     timeZone: "UTC",
@@ -21,6 +23,8 @@ export function DailyTrendChart({
   data: { date: string; total: string }[];
 }) {
   const { format } = useCurrency();
+  const { t, language } = useLanguage();
+  const locale = localeFor(language);
   const max = useMemo(
     () => Math.max(...data.map((d) => Number(d.total)), 1),
     [data]
@@ -31,7 +35,7 @@ export function DailyTrendChart({
   if (data.length === 0) {
     return (
       <p className="py-4 text-center text-sm text-text-muted">
-        No days in range yet.
+        {t("balance.noDaysInRange")}
       </p>
     );
   }
@@ -47,7 +51,7 @@ export function DailyTrendChart({
             <div key={d.date} className="group relative flex h-full flex-1">
               <div
                 tabIndex={0}
-                aria-label={`${fullDateLabel(d.date)}: ${format(d.total)}`}
+                aria-label={`${fullDateLabel(d.date, locale)}: ${format(d.total)}`}
                 className="mt-auto w-full rounded-t-[4px] bg-negative/35 outline-none transition-colors hover:bg-negative focus:bg-negative"
                 style={{ height: `${pct}%` }}
               />
@@ -57,7 +61,7 @@ export function DailyTrendChart({
                 <div className="tabular-nums font-semibold text-text-primary">
                   {format(d.total)}
                 </div>
-                <div className="text-text-muted">{fullDateLabel(d.date)}</div>
+                <div className="text-text-muted">{fullDateLabel(d.date, locale)}</div>
               </div>
             </div>
           );

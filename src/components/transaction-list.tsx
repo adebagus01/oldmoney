@@ -1,11 +1,13 @@
 "use client";
 
 import { useCurrency } from "@/components/currency-provider";
+import { useLanguage } from "@/components/language-provider";
+import { translatePaymentMethod, localeFor } from "@/lib/i18n";
 import { TransactionRowMenu } from "@/components/transaction-row-menu";
 import type { Transaction } from "@/lib/types";
 
-function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat("en-US", {
+function formatDate(iso: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
     month: "short",
     day: "numeric",
     timeZone: "UTC",
@@ -16,7 +18,7 @@ export function TransactionList({
   transactions,
   onEdit,
   onDelete,
-  emptyMessage = "No transactions yet.",
+  emptyMessage,
 }: {
   transactions: Transaction[];
   onEdit?: (t: Transaction) => void;
@@ -24,11 +26,14 @@ export function TransactionList({
   emptyMessage?: string;
 }) {
   const { format } = useCurrency();
+  const { t, language } = useLanguage();
+  const locale = localeFor(language);
+  const resolvedEmptyMessage = emptyMessage ?? t("add.noTransactionsYet");
 
   if (transactions.length === 0) {
     return (
       <p className="py-8 text-center text-sm text-text-muted">
-        {emptyMessage}
+        {resolvedEmptyMessage}
       </p>
     );
   }
@@ -49,8 +54,8 @@ export function TransactionList({
               ) : null}
             </div>
             <div className="text-xs text-text-muted">
-              {formatDate(t.occurredAt)}
-              {t.paymentMethod ? ` · ${t.paymentMethod}` : ""}
+              {formatDate(t.occurredAt, locale)}
+              {t.paymentMethod ? ` · ${translatePaymentMethod(t.paymentMethod, language)}` : ""}
             </div>
           </div>
           <div

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 
 export function TransactionRowMenu({
   onEdit,
@@ -10,6 +11,7 @@ export function TransactionRowMenu({
   onEdit?: () => void;
   onDelete?: () => void;
 }) {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -39,7 +41,7 @@ export function TransactionRowMenu({
         type="button"
         onClick={() => setOpen((o) => !o)}
         className="rounded-md p-1.5 text-text-muted transition-colors hover:text-text-primary"
-        aria-label="Transaction actions"
+        aria-label={t("transaction.transactionActions")}
       >
         <MoreVertical size={16} />
       </button>
@@ -57,7 +59,7 @@ export function TransactionRowMenu({
                 className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-text-primary transition-colors hover:bg-surface"
               >
                 <Pencil size={14} />
-                Edit
+                {t("common.edit")}
               </button>
             </li>
           ) : null}
@@ -72,7 +74,7 @@ export function TransactionRowMenu({
                 className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-negative transition-colors hover:bg-surface"
               >
                 <Trash2 size={14} />
-                Delete
+                {t("common.delete")}
               </button>
             </li>
           ) : null}

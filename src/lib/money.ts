@@ -13,10 +13,10 @@ export function currentMonthKey(): string {
   return `${year}-${month}`;
 }
 
-export function monthKeyLabel(monthKey: string): string {
+export function monthKeyLabel(monthKey: string, locale: string = "en-US"): string {
   const [year, month] = monthKey.split("-").map(Number);
   const date = new Date(Date.UTC(year, month - 1, 1));
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     month: "long",
     year: "numeric",
     timeZone: "UTC",

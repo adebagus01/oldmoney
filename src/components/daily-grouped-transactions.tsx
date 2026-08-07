@@ -2,11 +2,13 @@
 
 import { useMemo } from "react";
 import { useCurrency } from "@/components/currency-provider";
+import { useLanguage } from "@/components/language-provider";
+import { translatePaymentMethod, localeFor } from "@/lib/i18n";
 import { TransactionRowMenu } from "@/components/transaction-row-menu";
 import type { Transaction } from "@/lib/types";
 
-function dayLabel(iso: string): string {
-  return new Intl.DateTimeFormat("en-US", {
+function dayLabel(iso: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale, {
     weekday: "short",
     month: "short",
     day: "numeric",
@@ -18,7 +20,7 @@ export function DailyGroupedTransactions({
   transactions,
   onEdit,
   onDelete,
-  emptyMessage = "No transactions yet.",
+  emptyMessage,
 }: {
   transactions: Transaction[];
   onEdit?: (t: Transaction) => void;
@@ -26,6 +28,9 @@ export function DailyGroupedTransactions({
   emptyMessage?: string;
 }) {
   const { format } = useCurrency();
+  const { t, language } = useLanguage();
+  const locale = localeFor(language);
+  const resolvedEmptyMessage = emptyMessage ?? t("add.noTransactionsYet");
 
   const groups = useMemo(() => {
     const map = new Map<string, Transaction[]>();
@@ -40,7 +45,7 @@ export function DailyGroupedTransactions({
   if (transactions.length === 0) {
     return (
       <p className="py-8 text-center text-sm text-text-muted">
-        {emptyMessage}
+        {resolvedEmptyMessage}
       </p>
     );
   }
@@ -53,7 +58,7 @@ export function DailyGroupedTransactions({
           <div key={day}>
             <div className="mb-2 flex items-baseline justify-between px-1">
               <span className="text-xs font-semibold uppercase tracking-wide text-text-muted">
-                {dayLabel(day)}
+                {dayLabel(day, locale)}
               </span>
               <span className="tabular-nums text-xs text-text-muted">
                 {format(dayTotal)}
@@ -74,7 +79,9 @@ export function DailyGroupedTransactions({
                       ) : null}
                     </div>
                     {t.paymentMethod ? (
-                      <div className="text-xs text-text-muted">{t.paymentMethod}</div>
+                      <div className="text-xs text-text-muted">
+                        {translatePaymentMethod(t.paymentMethod, language)}
+                      </div>
                     ) : null}
                   </div>
                   <div

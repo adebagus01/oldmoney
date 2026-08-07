@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Infinity as InfinityIcon, Wallet, TrendingUp, TrendingDown, ChevronUp, ChevronDown } from "lucide-react";
 import { useCurrency } from "@/components/currency-provider";
+import { useLanguage } from "@/components/language-provider";
 
 export function LifetimeCard({
   income,
@@ -15,6 +16,7 @@ export function LifetimeCard({
 }) {
   const [open, setOpen] = useState(true);
   const { format } = useCurrency();
+  const { t } = useLanguage();
 
   const incomeNum = Number(income);
   const netNum = Number(net);
@@ -28,8 +30,8 @@ export function LifetimeCard({
             <InfinityIcon size={18} />
           </div>
           <div>
-            <div className="text-sm font-semibold text-text-primary">All time</div>
-            <div className="text-xs text-text-muted">Accumulated since the beginning</div>
+            <div className="text-sm font-semibold text-text-primary">{t("balance.allTime")}</div>
+            <div className="text-xs text-text-muted">{t("balance.accumulatedSince")}</div>
           </div>
         </div>
         <button
@@ -37,7 +39,7 @@ export function LifetimeCard({
           onClick={() => setOpen((o) => !o)}
           className="flex shrink-0 items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text-primary"
         >
-          {open ? "Hide" : "Show"}
+          {open ? t("balance.hide") : t("balance.show")}
           {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </button>
       </div>
@@ -49,7 +51,7 @@ export function LifetimeCard({
               <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-surface text-positive">
                 <Wallet size={13} />
               </span>
-              Net balance · all time
+              {t("balance.netBalanceAllTime")}
             </div>
             <div className="tabular-nums text-3xl font-bold text-text-primary">
               {format(net)}
@@ -62,8 +64,8 @@ export function LifetimeCard({
             </div>
             <div className="mt-2 text-xs text-text-muted">
               {incomeNum > 0
-                ? `You've kept ${savedPct.toFixed(0)}% of everything you've earned`
-                : "No income recorded yet"}
+                ? t("balance.keptPercent", { pct: savedPct.toFixed(0) })
+                : t("balance.noIncomeYet")}
             </div>
           </div>
 
@@ -71,7 +73,7 @@ export function LifetimeCard({
             <div className="rounded-xl border border-border bg-surface-raised p-3.5">
               <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-text-muted">
                 <TrendingUp size={13} className="text-positive" />
-                Income
+                {t("balance.income")}
               </div>
               <div className="tabular-nums text-lg font-semibold text-positive">
                 {format(income)}
@@ -80,7 +82,7 @@ export function LifetimeCard({
             <div className="rounded-xl border border-border bg-surface-raised p-3.5">
               <div className="mb-1 flex items-center gap-1.5 text-xs font-medium text-text-muted">
                 <TrendingDown size={13} className="text-negative" />
-                Expenses
+                {t("balance.expenses")}
               </div>
               <div className="tabular-nums text-lg font-semibold text-negative">
                 {format(expenses)}

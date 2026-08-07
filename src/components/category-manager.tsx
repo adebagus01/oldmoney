@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Trash2, Check, X, Pencil } from "lucide-react";
+import { useLanguage } from "@/components/language-provider";
 import type { Category, TransactionType } from "@/lib/types";
 
 const SWATCHES = [
@@ -18,6 +19,7 @@ const SWATCHES = [
 ];
 
 export function CategoryManager({ type }: { type: TransactionType }) {
+  const { t } = useLanguage();
   const [categories, setCategories] = useState<Category[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
@@ -53,13 +55,13 @@ export function CategoryManager({ type }: { type: TransactionType }) {
   }
 
   async function remove(id: string) {
-    if (!confirm("Delete this category? Its transactions will move to Uncategorised.")) {
+    if (!confirm(t("settings.deleteConfirm"))) {
       return;
     }
     const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
     if (!res.ok) {
       const body = await res.json();
-      setError(body.error ?? "Failed to delete");
+      setError(body.error ?? t("settings.deleteFailed"));
       return;
     }
     await load();
@@ -76,7 +78,7 @@ export function CategoryManager({ type }: { type: TransactionType }) {
     });
     if (!res.ok) {
       const body = await res.json();
-      setError(body.error ?? "Failed to add category");
+      setError(body.error ?? t("settings.addFailed"));
       return;
     }
     setNewName("");
@@ -129,7 +131,7 @@ export function CategoryManager({ type }: { type: TransactionType }) {
                 <span className="flex-1 text-sm text-text-primary">
                   {cat.name}
                   {cat.isFallback ? (
-                    <span className="ml-2 text-xs text-text-muted">(fallback)</span>
+                    <span className="ml-2 text-xs text-text-muted">{t("settings.fallback")}</span>
                   ) : null}
                 </span>
                 {!cat.isFallback ? (
@@ -168,14 +170,14 @@ export function CategoryManager({ type }: { type: TransactionType }) {
         <input
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
-          placeholder={`New ${type} category`}
+          placeholder={type === "expense" ? t("settings.newExpenseCategory") : t("settings.newIncomeCategory")}
           className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-base text-text-primary placeholder:text-text-muted outline-none focus:ring-2 focus:ring-accent md:text-sm"
         />
         <button
           type="submit"
           className="rounded-lg bg-accent px-3.5 py-2 text-sm font-semibold text-accent-foreground"
         >
-          Add
+          {t("settings.add")}
         </button>
       </form>
     </div>

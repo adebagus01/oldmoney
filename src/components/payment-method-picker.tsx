@@ -3,6 +3,8 @@
 import { clsx } from "clsx";
 import { Banknote, CreditCard, Wallet, Landmark } from "lucide-react";
 import { PAYMENT_METHODS, type PaymentMethod } from "@/lib/payment-methods";
+import { useLanguage } from "@/components/language-provider";
+import { translatePaymentMethod } from "@/lib/i18n";
 
 const ICONS: Record<PaymentMethod, typeof Banknote> = {
   Cash: Banknote,
@@ -18,6 +20,7 @@ export function PaymentMethodPicker({
   selected: PaymentMethod | null;
   onSelect: (method: PaymentMethod) => void;
 }) {
+  const { language } = useLanguage();
   return (
     <div className="grid grid-cols-3 gap-2">
       {PAYMENT_METHODS.map((method) => {
@@ -36,7 +39,7 @@ export function PaymentMethodPicker({
             )}
           >
             <Icon size={15} className="shrink-0" />
-            <span className="truncate">{method}</span>
+            <span className="truncate">{translatePaymentMethod(method, language)}</span>
           </button>
         );
       })}

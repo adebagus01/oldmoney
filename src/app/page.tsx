@@ -12,6 +12,7 @@ import { TransactionList } from "@/components/transaction-list";
 import { EditTransactionModal } from "@/components/edit-transaction-modal";
 import { useToast } from "@/components/toast-provider";
 import { useCurrency } from "@/components/currency-provider";
+import { useLanguage } from "@/components/language-provider";
 import { useDeleteWithUndo } from "@/lib/use-delete-with-undo";
 import type { PaymentMethod } from "@/lib/payment-methods";
 import type { Category, Transaction, TransactionType } from "@/lib/types";
@@ -39,6 +40,7 @@ export default function AddPage() {
   const amountRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { format } = useCurrency();
+  const { t } = useLanguage();
   const { visibleTransactions, requestDelete } = useDeleteWithUndo(recent);
 
   const categoriesForType = useMemo(
@@ -81,11 +83,11 @@ export default function AddPage() {
     setError(null);
 
     if (!amount || Number(amount) <= 0) {
-      setError("Enter an amount greater than zero.");
+      setError(t("add.errorAmount"));
       return;
     }
     if (!categoryId) {
-      setError("Pick a category.");
+      setError(t("add.errorCategory"));
       return;
     }
 
@@ -115,10 +117,10 @@ export default function AddPage() {
       await loadRecent();
       amountRef.current?.focus();
       const sign = type === "expense" ? "-" : "+";
-      toast(
-        `${type === "expense" ? "Expense" : "Income"} added: ${sign}${format(savedAmount)}`,
-        { tone: type === "expense" ? "negative" : "positive" }
-      );
+      const label = type === "expense" ? t("add.expenseAdded") : t("add.incomeAdded");
+      toast(`${label}: ${sign}${format(savedAmount)}`, {
+        tone: type === "expense" ? "negative" : "positive",
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save");
     } finally {
@@ -129,7 +131,7 @@ export default function AddPage() {
   async function handleEditSaved() {
     setEditingTransaction(null);
     await loadRecent();
-    toast("Changes saved");
+    toast(t("add.changesSaved"));
   }
 
   return (
@@ -146,7 +148,7 @@ export default function AddPage() {
                 : "text-text-muted"
             )}
           >
-            Expense
+            {t("add.expense")}
           </button>
           <button
             type="button"
@@ -158,7 +160,7 @@ export default function AddPage() {
                 : "text-text-muted"
             )}
           >
-            Income
+            {t("add.income")}
           </button>
         </div>
       </div>
@@ -175,12 +177,16 @@ export default function AddPage() {
           <NoteField
             value={note}
             onChange={setNote}
-            placeholder={type === "expense" ? "What did you buy? (optional)" : "(optional)"}
+            placeholder={
+              type === "expense"
+                ? t("add.notePlaceholderExpense")
+                : t("add.notePlaceholderIncome")
+            }
           />
         </div>
 
         <div className="mb-5">
-          <SectionLabel>Category</SectionLabel>
+          <SectionLabel>{t("add.category")}</SectionLabel>
           <CategoryChips
             categories={categoriesForType}
             selectedId={categoryId}
@@ -190,7 +196,7 @@ export default function AddPage() {
 
         {type === "expense" ? (
           <div className="mb-5">
-            <SectionLabel>Payment method</SectionLabel>
+            <SectionLabel>{t("add.paymentMethod")}</SectionLabel>
             <PaymentMethodPicker selected={paymentMethod} onSelect={setPaymentMethod} />
           </div>
         ) : null}
@@ -208,13 +214,17 @@ export default function AddPage() {
           disabled={saving}
           className="w-full rounded-lg bg-accent py-3 text-sm font-semibold text-accent-foreground transition-opacity disabled:opacity-50"
         >
-          {saving ? "Saving…" : `Save ${type === "expense" ? "expense" : "income"}`}
+          {saving
+            ? t("add.saving")
+            : type === "expense"
+              ? t("add.saveExpense")
+              : t("add.saveIncome")}
         </button>
       </form>
 
       <div className="mt-10">
         <h2 className="mb-2 text-sm font-semibold text-text-muted">
-          Recent
+          {t("add.recent")}
         </h2>
         <TransactionList
           transactions={visibleTransactions}

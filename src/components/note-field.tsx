@@ -1,6 +1,7 @@
 "use client";
 
 import { SectionLabel } from "@/components/section-label";
+import { useLanguage } from "@/components/language-provider";
 
 export function NoteField({
   value,
@@ -11,9 +12,10 @@ export function NoteField({
   onChange: (value: string) => void;
   placeholder: string;
 }) {
+  const { t } = useLanguage();
   return (
     <div>
-      <SectionLabel>Note</SectionLabel>
+      <SectionLabel>{t("add.note")}</SectionLabel>
       <input
         type="text"
         value={value}

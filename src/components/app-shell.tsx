@@ -4,22 +4,24 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PlusCircle, Wallet, BarChart3, Settings } from "lucide-react";
 import { clsx } from "clsx";
-
-const NAV_ITEMS = [
-  { href: "/", label: "Add", icon: PlusCircle },
-  { href: "/balance", label: "Balance", icon: Wallet },
-  { href: "/reports", label: "Reports", icon: BarChart3 },
-  { href: "/settings", label: "Settings", icon: Settings },
-];
+import { useLanguage } from "@/components/language-provider";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { t } = useLanguage();
+
+  const NAV_ITEMS = [
+    { href: "/", label: t("nav.add"), icon: PlusCircle },
+    { href: "/balance", label: t("nav.balance"), icon: Wallet },
+    { href: "/reports", label: t("nav.reports"), icon: BarChart3 },
+    { href: "/settings", label: t("nav.settings"), icon: Settings },
+  ];
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       <nav className="hidden md:flex md:w-56 md:flex-col md:border-r md:border-border md:px-3 md:py-6">
         <div className="px-3 pb-8 text-lg font-semibold tracking-tight text-text-primary">
-          Old Money
+          {t("nav.appName")}
         </div>
         <div className="flex flex-col gap-1">
           {NAV_ITEMS.map((item) => {
