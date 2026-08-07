@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { PlusCircle, Wallet, BarChart3, Settings } from "lucide-react";
+import { PlusCircle, Wallet, BarChart3, Calculator, Settings } from "lucide-react";
 import { clsx } from "clsx";
 import { useLanguage } from "@/components/language-provider";
 
@@ -14,6 +14,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     { href: "/", label: t("nav.add"), icon: PlusCircle },
     { href: "/balance", label: t("nav.balance"), icon: Wallet },
     { href: "/reports", label: t("nav.reports"), icon: BarChart3 },
+    { href: "/calculator", label: t("nav.calculator"), icon: Calculator },
     { href: "/settings", label: t("nav.settings"), icon: Settings },
   ];
 

@@ -44,3 +44,11 @@ export type ReportResponse = {
   transactions: Transaction[];
   breakdown: CategoryTotal[];
 };
+
+export type ForecastResponse = {
+  currentBalance: string;
+  avgMonthlyIncome: string;
+  avgMonthlyExpenses: string;
+  avgMonthlySavings: string;
+  monthsOfData: number;
+};
