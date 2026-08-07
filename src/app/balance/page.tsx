@@ -95,22 +95,41 @@ export default function BalancePage() {
                 </div>
               </div>
               {data.averageDailySpend.changePct !== null ? (
-                <div
-                  className={clsx(
-                    "flex items-center gap-1 text-sm font-semibold",
-                    data.averageDailySpend.changePct > 0
-                      ? "text-negative"
-                      : data.averageDailySpend.changePct < 0
-                        ? "text-positive"
-                        : "text-text-muted"
-                  )}
-                >
-                  {data.averageDailySpend.changePct > 0 ? (
-                    <ArrowUp size={14} />
-                  ) : data.averageDailySpend.changePct < 0 ? (
-                    <ArrowDown size={14} />
-                  ) : null}
-                  {Math.abs(data.averageDailySpend.changePct).toFixed(0)}% vs last month
+                <div className="text-right">
+                  <div
+                    className={clsx(
+                      "flex items-center justify-end gap-1 text-sm font-semibold",
+                      data.averageDailySpend.changePct > 0
+                        ? "text-negative"
+                        : data.averageDailySpend.changePct < 0
+                          ? "text-positive"
+                          : "text-text-muted"
+                    )}
+                  >
+                    {data.averageDailySpend.changePct > 0 ? (
+                      <ArrowUp size={14} />
+                    ) : data.averageDailySpend.changePct < 0 ? (
+                      <ArrowDown size={14} />
+                    ) : null}
+                    {Math.abs(data.averageDailySpend.changePct).toFixed(0)}% vs last month
+                  </div>
+                  <div
+                    className={clsx(
+                      "tabular-nums text-xs",
+                      BigInt(data.averageDailySpend.expenseGap) > 0n
+                        ? "text-negative"
+                        : BigInt(data.averageDailySpend.expenseGap) < 0n
+                          ? "text-positive"
+                          : "text-text-muted"
+                    )}
+                  >
+                    {BigInt(data.averageDailySpend.expenseGap) >= 0n ? "+" : "-"}
+                    {format(
+                      BigInt(data.averageDailySpend.expenseGap) < 0n
+                        ? -BigInt(data.averageDailySpend.expenseGap)
+                        : data.averageDailySpend.expenseGap
+                    )}
+                  </div>
                 </div>
               ) : null}
             </div>

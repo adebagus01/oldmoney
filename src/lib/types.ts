@@ -27,7 +27,13 @@ export type BalanceResponse = {
   month: string;
   monthly: { income: string; expenses: string; remaining: string };
   lifetime: { income: string; expenses: string; net: string };
-  averageDailySpend: { current: string; previous: string; changePct: number | null };
+  averageDailySpend: {
+    current: string;
+    previous: string;
+    changePct: number | null;
+    expenseGap: string;
+    previousMonthExpenses: string;
+  };
   categoryBreakdown: CategoryTotal[];
   dailyExpenses: { date: string; total: string }[];
 };

@@ -98,13 +98,13 @@ export async function GET(req: NextRequest) {
   // previous month is always fully elapsed, so it uses its full day count.
   const prevDayCount = daysInRange(prevRange);
   const avgDaily = dayCount > 0 ? monthlyExpenses / BigInt(dayCount) : 0n;
-  const avgDailyPrecise = dayCount > 0 ? Number(monthlyExpenses) / dayCount : 0;
-  const prevAvgDailyPrecise =
-    prevDayCount > 0 ? Number(prevMonthlyExpenses) / prevDayCount : 0;
 
+  // Change vs. last month is based on *total* expenses, not the daily
+  // average, plus the raw gap between the two totals.
+  const expenseGap = monthlyExpenses - prevMonthlyExpenses;
   const changePct =
-    prevAvgDailyPrecise > 0
-      ? ((avgDailyPrecise - prevAvgDailyPrecise) / prevAvgDailyPrecise) * 100
+    prevMonthlyExpenses > 0n
+      ? (Number(expenseGap) / Number(prevMonthlyExpenses)) * 100
       : null;
 
   return NextResponse.json({
@@ -126,6 +126,8 @@ export async function GET(req: NextRequest) {
           ? (prevMonthlyExpenses / BigInt(prevDayCount)).toString()
           : "0",
       changePct,
+      expenseGap: expenseGap.toString(),
+      previousMonthExpenses: prevMonthlyExpenses.toString(),
     },
     categoryBreakdown,
     dailyExpenses,
