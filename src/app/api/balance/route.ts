@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { currentMonthKey, toMonthRange } from "@/lib/money";
+import { currentMonthKey, shiftMonthKey, toMonthRange } from "@/lib/money";
 
 async function sumByType(
   type: "expense" | "income",
@@ -20,9 +20,15 @@ function dateKey(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
+function daysInRange(range: { start: Date; end: Date }): number {
+  return Math.round((range.end.getTime() - range.start.getTime()) / 86400000);
+}
+
 export async function GET(req: NextRequest) {
   const monthKey = req.nextUrl.searchParams.get("month") ?? currentMonthKey();
   const range = toMonthRange(monthKey);
+  const prevMonthKey = shiftMonthKey(monthKey, -1);
+  const prevRange = toMonthRange(prevMonthKey);
 
   const [
     monthlyIncome,
@@ -31,6 +37,7 @@ export async function GET(req: NextRequest) {
     lifetimeExpenses,
     monthlyExpenseTx,
     categoryTotals,
+    prevMonthlyExpenses,
   ] = await Promise.all([
     sumByType("income", range),
     sumByType("expense", range),
@@ -51,6 +58,7 @@ export async function GET(req: NextRequest) {
       },
       _sum: { amount: true },
     }),
+    sumByType("expense", prevRange),
   ]);
 
   const monthlyRemaining = monthlyIncome - monthlyExpenses;
@@ -71,12 +79,7 @@ export async function GET(req: NextRequest) {
   // Zero-filled daily series, capped at today for the current month.
   const today = new Date();
   const isCurrentMonth = monthKey === currentMonthKey();
-  const dayCount = isCurrentMonth
-    ? today.getUTCDate()
-    : Math.round(
-        (new Date(range.end).getTime() - new Date(range.start).getTime()) /
-          86400000
-      );
+  const dayCount = isCurrentMonth ? today.getUTCDate() : daysInRange(range);
 
   const dailyTotals = new Map<string, bigint>();
   for (const tx of monthlyExpenseTx) {
@@ -91,6 +94,19 @@ export async function GET(req: NextRequest) {
     return { date: key, total: (dailyTotals.get(key) ?? 0n).toString() };
   });
 
+  // Average daily spend for the selected month vs. the previous one — the
+  // previous month is always fully elapsed, so it uses its full day count.
+  const prevDayCount = daysInRange(prevRange);
+  const avgDaily = dayCount > 0 ? monthlyExpenses / BigInt(dayCount) : 0n;
+  const avgDailyPrecise = dayCount > 0 ? Number(monthlyExpenses) / dayCount : 0;
+  const prevAvgDailyPrecise =
+    prevDayCount > 0 ? Number(prevMonthlyExpenses) / prevDayCount : 0;
+
+  const changePct =
+    prevAvgDailyPrecise > 0
+      ? ((avgDailyPrecise - prevAvgDailyPrecise) / prevAvgDailyPrecise) * 100
+      : null;
+
   return NextResponse.json({
     month: monthKey,
     monthly: {
@@ -102,6 +118,14 @@ export async function GET(req: NextRequest) {
       income: lifetimeIncome.toString(),
       expenses: lifetimeExpenses.toString(),
       net: lifetimeNet.toString(),
+    },
+    averageDailySpend: {
+      current: avgDaily.toString(),
+      previous:
+        prevDayCount > 0
+          ? (prevMonthlyExpenses / BigInt(prevDayCount)).toString()
+          : "0",
+      changePct,
     },
     categoryBreakdown,
     dailyExpenses,

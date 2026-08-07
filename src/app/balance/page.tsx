@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { clsx } from "clsx";
+import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown } from "lucide-react";
 import { currentMonthKey, monthKeyLabel, shiftMonthKey } from "@/lib/money";
 import { useCurrency } from "@/components/currency-provider";
 import { LifetimeCard } from "@/components/lifetime-card";
@@ -84,6 +85,34 @@ export default function BalancePage() {
               <div className="tabular-nums text-3xl font-bold text-text-primary">
                 {format(data.monthly.remaining)}
               </div>
+            </div>
+
+            <div className="mt-4 flex items-end justify-between border-t border-border pt-4">
+              <div>
+                <div className="text-xs text-text-muted">Average daily spend</div>
+                <div className="tabular-nums text-xl font-semibold text-text-primary">
+                  {format(data.averageDailySpend.current)}
+                </div>
+              </div>
+              {data.averageDailySpend.changePct !== null ? (
+                <div
+                  className={clsx(
+                    "flex items-center gap-1 text-sm font-semibold",
+                    data.averageDailySpend.changePct > 0
+                      ? "text-negative"
+                      : data.averageDailySpend.changePct < 0
+                        ? "text-positive"
+                        : "text-text-muted"
+                  )}
+                >
+                  {data.averageDailySpend.changePct > 0 ? (
+                    <ArrowUp size={14} />
+                  ) : data.averageDailySpend.changePct < 0 ? (
+                    <ArrowDown size={14} />
+                  ) : null}
+                  {Math.abs(data.averageDailySpend.changePct).toFixed(0)}% vs last month
+                </div>
+              ) : null}
             </div>
           </section>
 

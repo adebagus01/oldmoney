@@ -27,6 +27,7 @@ export type BalanceResponse = {
   month: string;
   monthly: { income: string; expenses: string; remaining: string };
   lifetime: { income: string; expenses: string; net: string };
+  averageDailySpend: { current: string; previous: string; changePct: number | null };
   categoryBreakdown: CategoryTotal[];
   dailyExpenses: { date: string; total: string }[];
 };
