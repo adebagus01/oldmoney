@@ -20,7 +20,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
-      <nav className="hidden md:flex md:w-56 md:flex-col md:border-r md:border-border md:px-3 md:py-6">
+      <nav className="hidden md:sticky md:top-0 md:flex md:h-screen md:w-56 md:shrink-0 md:flex-col md:self-start md:overflow-y-auto md:border-r md:border-border md:px-3 md:py-6">
         <div className="px-3 pb-8 text-lg font-semibold tracking-tight text-text-primary">
           {t("nav.appName")}
         </div>
