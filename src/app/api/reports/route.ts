@@ -27,12 +27,14 @@ export async function GET(req: NextRequest) {
         ? { amount: "desc" }
         : sort === "amount_asc"
           ? { amount: "asc" }
-          : { occurredAt: "desc" };
+          : sort === "custom"
+            ? { sortOrder: "asc" }
+            : { occurredAt: "desc" };
 
   const [transactions, breakdown] = await Promise.all([
     prisma.transaction.findMany({
       where,
-      orderBy: [orderBy, { createdAt: "desc" }],
+      orderBy: sort === "custom" ? [orderBy] : [orderBy, { createdAt: "desc" }],
       include: { category: true },
     }),
     prisma.transaction.groupBy({

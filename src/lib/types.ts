@@ -17,6 +17,7 @@ export type Transaction = {
   paymentMethod: string | null;
   occurredAt: string;
   createdAt: string;
+  sortOrder: string;
   categoryId: string;
   category: Category;
 };

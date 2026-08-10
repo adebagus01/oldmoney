@@ -79,6 +79,8 @@ const dict = {
     sortOldest: { en: "Oldest first", id: "Terlama dulu" },
     sortHighest: { en: "Highest amount", id: "Jumlah tertinggi" },
     sortLowest: { en: "Lowest amount", id: "Jumlah terendah" },
+    sortCustom: { en: "Custom order", id: "Urutan kustom" },
+    dragHint: { en: "Drag to reorder", id: "Seret untuk mengurutkan" },
     totalSpent: { en: "Total spent", id: "Total pengeluaran" },
     totalEarned: { en: "Total earned", id: "Total pemasukan" },
     byCategory: { en: "By category", id: "Per kategori" },
@@ -86,6 +88,7 @@ const dict = {
     transactions: { en: "Transactions", id: "Transaksi" },
     noExpensesThisMonth: { en: "No expenses this month.", id: "Belum ada pengeluaran bulan ini." },
     noIncomeThisMonth: { en: "No income this month.", id: "Belum ada pemasukan bulan ini." },
+    reorderFailed: { en: "Couldn't save the new order.", id: "Gagal menyimpan urutan baru." },
   },
   calculator: {
     title: { en: "Calculator", id: "Kalkulator" },

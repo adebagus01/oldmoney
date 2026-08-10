@@ -33,6 +33,12 @@ model Transaction {
   paymentMethod String?
   occurredAt    DateTime
   createdAt     DateTime         @default(now())
+  // Ascending = display order in "Custom order" mode. Defaults to negative
+  // creation-time millis so untouched rows sort newest-first, matching the
+  // default view; manual reordering overwrites it with small sequential
+  // ints for the reordered subset, and new transactions (still using the
+  // very negative default) naturally land above them, at the top.
+  sortOrder     BigInt           @default(0)
   category      Category         @relation(fields: [categoryId], references: [id])
   categoryId    String
 }

@@ -1,5 +1,5 @@
-export function serializeTransaction<T extends { amount: bigint }>(
+export function serializeTransaction<T extends { amount: bigint; sortOrder: bigint }>(
   tx: T
-): Omit<T, "amount"> & { amount: string } {
-  return { ...tx, amount: tx.amount.toString() };
+): Omit<T, "amount" | "sortOrder"> & { amount: string; sortOrder: string } {
+  return { ...tx, amount: tx.amount.toString(), sortOrder: tx.sortOrder.toString() };
 }

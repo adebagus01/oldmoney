@@ -10,11 +10,12 @@ import { useLanguage } from "@/components/language-provider";
 import { useToast } from "@/components/toast-provider";
 import { useDeleteWithUndo } from "@/lib/use-delete-with-undo";
 import { DailyGroupedTransactions } from "@/components/daily-grouped-transactions";
+import { ReorderableTransactionList } from "@/components/reorderable-transaction-list";
 import { CategoryBreakdown } from "@/components/category-breakdown";
 import { EditTransactionModal } from "@/components/edit-transaction-modal";
 import type { Category, CategoryTotal, ReportResponse, Transaction, TransactionType } from "@/lib/types";
 
-type SortKey = "date_desc" | "date_asc" | "amount_desc" | "amount_asc";
+type SortKey = "date_desc" | "date_asc" | "amount_desc" | "amount_asc" | "custom";
 
 export default function ReportsPage() {
   const [type, setType] = useState<TransactionType>("expense");
@@ -80,6 +81,18 @@ export default function ReportsPage() {
     setEditingTransaction(null);
     await loadReport();
     toast(t("add.changesSaved"));
+  }
+
+  async function handleReorder(orderedIds: string[]) {
+    const res = await fetch("/api/transactions/reorder", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: orderedIds }),
+    });
+    if (!res.ok) {
+      toast(t("reports.reorderFailed"));
+      await loadReport();
+    }
   }
 
   return (
@@ -157,6 +170,7 @@ export default function ReportsPage() {
           <option value="date_asc">{t("reports.sortOldest")}</option>
           <option value="amount_desc">{t("reports.sortHighest")}</option>
           <option value="amount_asc">{t("reports.sortLowest")}</option>
+          <option value="custom">{t("reports.sortCustom")}</option>
         </select>
       </div>
 
@@ -190,14 +204,26 @@ export default function ReportsPage() {
           <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
             {t("reports.transactions")}
           </h2>
-          <DailyGroupedTransactions
-            transactions={visibleTransactions}
-            onEdit={setEditingTransaction}
-            onDelete={requestDelete}
-            emptyMessage={
-              type === "expense" ? t("reports.noExpensesThisMonth") : t("reports.noIncomeThisMonth")
-            }
-          />
+          {sort === "custom" ? (
+            <ReorderableTransactionList
+              transactions={visibleTransactions}
+              onReorder={handleReorder}
+              onEdit={setEditingTransaction}
+              onDelete={requestDelete}
+              emptyMessage={
+                type === "expense" ? t("reports.noExpensesThisMonth") : t("reports.noIncomeThisMonth")
+              }
+            />
+          ) : (
+            <DailyGroupedTransactions
+              transactions={visibleTransactions}
+              onEdit={setEditingTransaction}
+              onDelete={requestDelete}
+              emptyMessage={
+                type === "expense" ? t("reports.noExpensesThisMonth") : t("reports.noIncomeThisMonth")
+              }
+            />
+          )}
         </>
       )}
 

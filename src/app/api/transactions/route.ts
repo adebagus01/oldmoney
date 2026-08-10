@@ -74,6 +74,10 @@ export async function POST(req: NextRequest) {
       note: typeof note === "string" && note.trim() ? note.trim() : null,
       paymentMethod: isPaymentMethod(paymentMethod) ? paymentMethod : null,
       occurredAt: occurredAt ? new Date(occurredAt) : new Date(),
+      // Negative creation-time millis so it naturally sorts to the top of
+      // "Custom order" (see schema.prisma) without disturbing any manual
+      // reordering already applied to older transactions.
+      sortOrder: BigInt(-Date.now()),
     },
     include: { category: true },
   });
