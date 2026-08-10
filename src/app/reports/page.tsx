@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { clsx } from "clsx";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import { currentMonthKey, monthKeyLabel, shiftMonthKey, toMonthRange } from "@/lib/money";
-import { localeFor } from "@/lib/i18n";
+import { localeFor, translatePaymentMethod } from "@/lib/i18n";
 import { useCurrency } from "@/components/currency-provider";
 import { useLanguage } from "@/components/language-provider";
 import { useToast } from "@/components/toast-provider";
@@ -23,6 +23,7 @@ export default function ReportsPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState("");
   const [sort, setSort] = useState<SortKey>("date_desc");
+  const [search, setSearch] = useState("");
   const [data, setData] = useState<ReportResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -30,6 +31,22 @@ export default function ReportsPage() {
   const { t, language } = useLanguage();
   const { toast } = useToast();
   const { visibleTransactions, requestDelete } = useDeleteWithUndo(data?.transactions ?? []);
+
+  const searchedTransactions = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return visibleTransactions;
+    return visibleTransactions.filter((tx) => {
+      const haystack = [
+        tx.category.name,
+        tx.note ?? "",
+        tx.paymentMethod ?? "",
+        tx.paymentMethod ? translatePaymentMethod(tx.paymentMethod, language) : "",
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [visibleTransactions, search, language]);
 
   const isCurrentMonth = month === currentMonthKey();
 
@@ -61,13 +78,13 @@ export default function ReportsPage() {
   }, [loadReport]);
 
   const total = useMemo(
-    () => visibleTransactions.reduce((sum, t) => sum + BigInt(t.amount), 0n).toString(),
-    [visibleTransactions]
+    () => searchedTransactions.reduce((sum, t) => sum + BigInt(t.amount), 0n).toString(),
+    [searchedTransactions]
   );
 
   const breakdown = useMemo<CategoryTotal[]>(() => {
     const map = new Map<string, { category: Category; total: bigint }>();
-    for (const t of visibleTransactions) {
+    for (const t of searchedTransactions) {
       const existing = map.get(t.category.id);
       if (existing) existing.total += BigInt(t.amount);
       else map.set(t.category.id, { category: t.category, total: BigInt(t.amount) });
@@ -75,7 +92,7 @@ export default function ReportsPage() {
     return Array.from(map.values())
       .map((b) => ({ category: b.category, total: b.total.toString() }))
       .sort((a, b) => (BigInt(b.total) > BigInt(a.total) ? 1 : -1));
-  }, [visibleTransactions]);
+  }, [searchedTransactions]);
 
   async function handleSaved() {
     setEditingTransaction(null);
@@ -174,6 +191,30 @@ export default function ReportsPage() {
         </select>
       </div>
 
+      <div className="relative mb-6">
+        <Search
+          size={16}
+          className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-text-muted"
+        />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t("reports.searchPlaceholder")}
+          className="w-full rounded-xl border border-border bg-surface py-2.5 pr-9 pl-9 text-base text-text-primary placeholder:text-text-muted outline-none focus:border-accent md:text-sm"
+        />
+        {search ? (
+          <button
+            type="button"
+            onClick={() => setSearch("")}
+            className="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-md p-1 text-text-muted hover:text-text-primary"
+            aria-label={t("reports.clearSearch")}
+          >
+            <X size={14} />
+          </button>
+        ) : null}
+      </div>
+
       {loading || !data ? (
         <p className="py-8 text-center text-sm text-text-muted">{t("common.loading")}</p>
       ) : (
@@ -206,21 +247,29 @@ export default function ReportsPage() {
           </h2>
           {sort === "custom" ? (
             <ReorderableTransactionList
-              transactions={visibleTransactions}
+              transactions={searchedTransactions}
               onReorder={handleReorder}
               onEdit={setEditingTransaction}
               onDelete={requestDelete}
               emptyMessage={
-                type === "expense" ? t("reports.noExpensesThisMonth") : t("reports.noIncomeThisMonth")
+                search.trim()
+                  ? t("reports.noSearchResults")
+                  : type === "expense"
+                    ? t("reports.noExpensesThisMonth")
+                    : t("reports.noIncomeThisMonth")
               }
             />
           ) : (
             <DailyGroupedTransactions
-              transactions={visibleTransactions}
+              transactions={searchedTransactions}
               onEdit={setEditingTransaction}
               onDelete={requestDelete}
               emptyMessage={
-                type === "expense" ? t("reports.noExpensesThisMonth") : t("reports.noIncomeThisMonth")
+                search.trim()
+                  ? t("reports.noSearchResults")
+                  : type === "expense"
+                    ? t("reports.noExpensesThisMonth")
+                    : t("reports.noIncomeThisMonth")
               }
             />
           )}

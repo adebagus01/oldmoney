@@ -89,6 +89,9 @@ const dict = {
     noExpensesThisMonth: { en: "No expenses this month.", id: "Belum ada pengeluaran bulan ini." },
     noIncomeThisMonth: { en: "No income this month.", id: "Belum ada pemasukan bulan ini." },
     reorderFailed: { en: "Couldn't save the new order.", id: "Gagal menyimpan urutan baru." },
+    searchPlaceholder: { en: "Search notes or categories", id: "Cari catatan atau kategori" },
+    clearSearch: { en: "Clear search", id: "Hapus pencarian" },
+    noSearchResults: { en: "No transactions match your search.", id: "Tidak ada transaksi yang cocok dengan pencarianmu." },
   },
   calculator: {
     title: { en: "Calculator", id: "Kalkulator" },
