@@ -10,12 +10,11 @@ import { useLanguage } from "@/components/language-provider";
 import { useToast } from "@/components/toast-provider";
 import { useDeleteWithUndo } from "@/lib/use-delete-with-undo";
 import { DailyGroupedTransactions } from "@/components/daily-grouped-transactions";
-import { ReorderableTransactionList } from "@/components/reorderable-transaction-list";
 import { CategoryBreakdown } from "@/components/category-breakdown";
 import { EditTransactionModal } from "@/components/edit-transaction-modal";
 import type { Category, CategoryTotal, ReportResponse, Transaction, TransactionType } from "@/lib/types";
 
-type SortKey = "date_desc" | "date_asc" | "amount_desc" | "amount_asc" | "custom";
+type SortKey = "date_desc" | "date_asc" | "amount_desc" | "amount_asc";
 
 export default function ReportsPage() {
   const [type, setType] = useState<TransactionType>("expense");
@@ -187,7 +186,6 @@ export default function ReportsPage() {
           <option value="date_asc">{t("reports.sortOldest")}</option>
           <option value="amount_desc">{t("reports.sortHighest")}</option>
           <option value="amount_asc">{t("reports.sortLowest")}</option>
-          <option value="custom">{t("reports.sortCustom")}</option>
         </select>
       </div>
 
@@ -242,37 +240,25 @@ export default function ReportsPage() {
             </div>
           ) : null}
 
-          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">
-            {t("reports.transactions")}
-          </h2>
-          {sort === "custom" ? (
-            <ReorderableTransactionList
-              transactions={searchedTransactions}
-              onReorder={handleReorder}
-              onEdit={setEditingTransaction}
-              onDelete={requestDelete}
-              emptyMessage={
-                search.trim()
-                  ? t("reports.noSearchResults")
-                  : type === "expense"
-                    ? t("reports.noExpensesThisMonth")
-                    : t("reports.noIncomeThisMonth")
-              }
-            />
-          ) : (
-            <DailyGroupedTransactions
-              transactions={searchedTransactions}
-              onEdit={setEditingTransaction}
-              onDelete={requestDelete}
-              emptyMessage={
-                search.trim()
-                  ? t("reports.noSearchResults")
-                  : type === "expense"
-                    ? t("reports.noExpensesThisMonth")
-                    : t("reports.noIncomeThisMonth")
-              }
-            />
-          )}
+          <div className="mb-2 flex items-baseline justify-between">
+            <h2 className="text-xs font-semibold uppercase tracking-wide text-text-muted">
+              {t("reports.transactions")}
+            </h2>
+            <span className="text-xs text-text-muted">{t("reports.dragHint")}</span>
+          </div>
+          <DailyGroupedTransactions
+            transactions={searchedTransactions}
+            onEdit={setEditingTransaction}
+            onDelete={requestDelete}
+            onReorder={handleReorder}
+            emptyMessage={
+              search.trim()
+                ? t("reports.noSearchResults")
+                : type === "expense"
+                  ? t("reports.noExpensesThisMonth")
+                  : t("reports.noIncomeThisMonth")
+            }
+          />
         </>
       )}
 

@@ -79,7 +79,6 @@ const dict = {
     sortOldest: { en: "Oldest first", id: "Terlama dulu" },
     sortHighest: { en: "Highest amount", id: "Jumlah tertinggi" },
     sortLowest: { en: "Lowest amount", id: "Jumlah terendah" },
-    sortCustom: { en: "Custom order", id: "Urutan kustom" },
     dragHint: { en: "Drag to reorder", id: "Seret untuk mengurutkan" },
     totalSpent: { en: "Total spent", id: "Total pengeluaran" },
     totalEarned: { en: "Total earned", id: "Total pemasukan" },

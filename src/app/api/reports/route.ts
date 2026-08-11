@@ -27,14 +27,16 @@ export async function GET(req: NextRequest) {
         ? { amount: "desc" }
         : sort === "amount_asc"
           ? { amount: "asc" }
-          : sort === "custom"
-            ? { sortOrder: "asc" }
-            : { occurredAt: "desc" };
+          : { occurredAt: "desc" };
 
   const [transactions, breakdown] = await Promise.all([
     prisma.transaction.findMany({
       where,
-      orderBy: sort === "custom" ? [orderBy] : [orderBy, { createdAt: "desc" }],
+      // sortOrder is the tiebreaker so drag-reordering (which only ever
+      // reorders transactions sharing the same day) actually sticks: same
+      // day means an exact occurredAt tie under the default date sort, so
+      // this is what decides display order within that day.
+      orderBy: [orderBy, { sortOrder: "asc" }, { createdAt: "desc" }],
       include: { category: true },
     }),
     prisma.transaction.groupBy({
