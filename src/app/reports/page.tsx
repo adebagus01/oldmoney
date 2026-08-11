@@ -214,7 +214,7 @@ export default function ReportsPage() {
           </div>
 
           {breakdown.length > 0 ? (
-            <div className="mb-8">
+            <div className="mb-6">
               <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-text-muted">
                 {t("reports.byCategory")}
               </h2>
@@ -222,7 +222,7 @@ export default function ReportsPage() {
             </div>
           ) : null}
 
-          <div className="mb-2 flex items-baseline justify-between">
+          <div className="mb-3 flex items-baseline justify-between">
             <h2 className="text-xs font-semibold uppercase tracking-wide text-text-muted">
               {t("reports.transactions")}
             </h2>
