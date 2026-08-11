@@ -161,14 +161,15 @@ function DayGroup({
             <div className="min-w-0 flex-1">
               <div className="truncate text-sm font-medium text-text-primary">
                 {tx.category.name}
-                {tx.note ? (
-                  <span className="font-normal text-text-muted"> · {tx.note}</span>
+                {tx.paymentMethod ? (
+                  <span className="font-normal text-text-muted">
+                    {" "}
+                    · {translatePaymentMethod(tx.paymentMethod, language)}
+                  </span>
                 ) : null}
               </div>
-              {tx.paymentMethod ? (
-                <div className="text-xs text-text-muted">
-                  {translatePaymentMethod(tx.paymentMethod, language)}
-                </div>
+              {tx.note ? (
+                <div className="truncate text-xs text-text-muted">{tx.note}</div>
               ) : null}
             </div>
             <div

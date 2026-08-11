@@ -49,13 +49,16 @@ export function TransactionList({
           <div className="min-w-0 flex-1">
             <div className="truncate text-sm font-medium text-text-primary">
               {t.category.name}
-              {t.note ? (
-                <span className="font-normal text-text-muted"> · {t.note}</span>
+              {t.paymentMethod ? (
+                <span className="font-normal text-text-muted">
+                  {" "}
+                  · {translatePaymentMethod(t.paymentMethod, language)}
+                </span>
               ) : null}
             </div>
-            <div className="text-xs text-text-muted">
+            <div className="truncate text-xs text-text-muted">
               {formatDate(t.occurredAt, locale)}
-              {t.paymentMethod ? ` · ${translatePaymentMethod(t.paymentMethod, language)}` : ""}
+              {t.note ? ` · ${t.note}` : ""}
             </div>
           </div>
           <div
