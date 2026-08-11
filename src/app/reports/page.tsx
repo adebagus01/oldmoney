@@ -12,9 +12,8 @@ import { useDeleteWithUndo } from "@/lib/use-delete-with-undo";
 import { DailyGroupedTransactions } from "@/components/daily-grouped-transactions";
 import { CategoryBreakdown } from "@/components/category-breakdown";
 import { EditTransactionModal } from "@/components/edit-transaction-modal";
+import { ReportFilters, type SortKey } from "@/components/report-filters";
 import type { Category, CategoryTotal, ReportResponse, Transaction, TransactionType } from "@/lib/types";
-
-type SortKey = "date_desc" | "date_asc" | "amount_desc" | "amount_asc";
 
 export default function ReportsPage() {
   const [type, setType] = useState<TransactionType>("expense");
@@ -163,54 +162,37 @@ export default function ReportsPage() {
         </button>
       </div>
 
-      <div className="mb-6 flex flex-wrap items-center gap-2">
-        <select
-          value={categoryId}
-          onChange={(e) => setCategoryId(e.target.value)}
-          className="rounded-full border border-border bg-surface px-3 py-1.5 text-base font-medium text-text-primary outline-none md:text-xs"
-        >
-          <option value="">{t("reports.allCategories")}</option>
-          {categories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={sort}
-          onChange={(e) => setSort(e.target.value as SortKey)}
-          className="rounded-full border border-border bg-surface px-3 py-1.5 text-base font-medium text-text-primary outline-none md:text-xs"
-        >
-          <option value="date_desc">{t("reports.sortNewest")}</option>
-          <option value="date_asc">{t("reports.sortOldest")}</option>
-          <option value="amount_desc">{t("reports.sortHighest")}</option>
-          <option value="amount_asc">{t("reports.sortLowest")}</option>
-        </select>
-      </div>
-
-      <div className="relative mb-6">
-        <Search
-          size={16}
-          className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-text-muted"
+      <div className="mb-6 flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search
+            size={16}
+            className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-text-muted"
+          />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t("reports.searchPlaceholder")}
+            className="w-full rounded-xl border border-border bg-surface py-2.5 pr-9 pl-9 text-base text-text-primary placeholder:text-text-muted outline-none focus:border-accent md:text-sm"
+          />
+          {search ? (
+            <button
+              type="button"
+              onClick={() => setSearch("")}
+              className="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-md p-1 text-text-muted hover:text-text-primary"
+              aria-label={t("reports.clearSearch")}
+            >
+              <X size={14} />
+            </button>
+          ) : null}
+        </div>
+        <ReportFilters
+          categories={categories}
+          categoryId={categoryId}
+          onCategoryChange={setCategoryId}
+          sort={sort}
+          onSortChange={setSort}
         />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder={t("reports.searchPlaceholder")}
-          className="w-full rounded-xl border border-border bg-surface py-2.5 pr-9 pl-9 text-base text-text-primary placeholder:text-text-muted outline-none focus:border-accent md:text-sm"
-        />
-        {search ? (
-          <button
-            type="button"
-            onClick={() => setSearch("")}
-            className="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-md p-1 text-text-muted hover:text-text-primary"
-            aria-label={t("reports.clearSearch")}
-          >
-            <X size={14} />
-          </button>
-        ) : null}
       </div>
 
       {loading || !data ? (

@@ -91,6 +91,9 @@ const dict = {
     searchPlaceholder: { en: "Search notes or categories", id: "Cari catatan atau kategori" },
     clearSearch: { en: "Clear search", id: "Hapus pencarian" },
     noSearchResults: { en: "No transactions match your search.", id: "Tidak ada transaksi yang cocok dengan pencarianmu." },
+    filters: { en: "Filters", id: "Filter" },
+    filterCategory: { en: "Category", id: "Kategori" },
+    filterSort: { en: "Sort by", id: "Urutkan" },
   },
   calculator: {
     title: { en: "Calculator", id: "Kalkulator" },
