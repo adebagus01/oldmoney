@@ -211,6 +211,9 @@ export default function ReportsPage() {
             >
               {format(total)}
             </div>
+            <div className="text-sm text-text-muted">
+              {t("reports.transactionCount", { count: searchedTransactions.length })}
+            </div>
           </div>
 
           {breakdown.length > 0 ? (
