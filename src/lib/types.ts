@@ -53,3 +53,46 @@ export type ForecastResponse = {
   avgMonthlySavings: string;
   monthsOfData: number;
 };
+
+export type CategoryStat = { name: string; color: string; total: string; percentOfTotal: number };
+
+export type BiggestExpenseStat = {
+  amount: string;
+  categoryName: string;
+  categoryColor: string;
+  note: string | null;
+  occurredAt: string;
+};
+
+export type MonthlyRecap =
+  | { hasData: false; month: string }
+  | {
+      hasData: true;
+      month: string;
+      totalExpenses: string;
+      totalIncome: string;
+      netSaved: string;
+      expenseChangePct: number | null;
+      topCategory: CategoryStat | null;
+      biggestExpense: BiggestExpenseStat | null;
+      transactionCount: number;
+      avgDailySpend: string;
+      daysWithSpending: number;
+    };
+
+export type AllTimeRecap =
+  | { hasData: false }
+  | {
+      hasData: true;
+      firstTransactionDate: string;
+      totalExpenses: string;
+      totalIncome: string;
+      netBalance: string;
+      topCategory: CategoryStat | null;
+      biggestExpense: BiggestExpenseStat | null;
+      busiestMonth: { month: string; total: string } | null;
+      transactionCount: number;
+      monthsActive: number;
+      daysTracked: number;
+      topPaymentMethod: string | null;
+    };

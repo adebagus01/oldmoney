@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { clsx } from "clsx";
-import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowUp, ArrowDown, Sparkles } from "lucide-react";
 import { currentMonthKey, monthKeyLabel, shiftMonthKey } from "@/lib/money";
 import { localeFor } from "@/lib/i18n";
 import { useCurrency } from "@/components/currency-provider";
@@ -56,6 +57,20 @@ export default function BalancePage() {
           <ChevronRight size={18} />
         </button>
       </div>
+
+      <Link
+        href="/recap"
+        className="mb-6 flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3 transition-colors hover:bg-surface-raised"
+      >
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent/15 text-accent">
+          <Sparkles size={16} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-sm font-semibold text-text-primary">{t("recap.cardTitle")}</div>
+          <div className="truncate text-xs text-text-muted">{t("recap.cardSubtitle")}</div>
+        </div>
+        <span className="shrink-0 text-xs font-semibold text-accent">{t("recap.cardButton")}</span>
+      </Link>
 
       {data && !loading ? (
         <>
