@@ -57,3 +57,84 @@ body {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }
+
+/* ---- Recap story animations ---- */
+
+@keyframes recap-scene-in {
+  from { opacity: 0; transform: scale(1.06); filter: blur(6px); }
+  to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+@keyframes recap-scene-out {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.96); }
+}
+@keyframes recap-rise {
+  from { opacity: 0; transform: translateY(28px); filter: blur(8px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+@keyframes recap-pop {
+  0% { opacity: 0; transform: scale(0.4) rotate(-12deg); }
+  60% { opacity: 1; transform: scale(1.08) rotate(3deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+@keyframes recap-blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(8vmax, -6vmax) scale(1.15); }
+  66% { transform: translate(-6vmax, 5vmax) scale(0.9); }
+}
+@keyframes recap-tile {
+  0%, 100% { transform: perspective(900px) rotateX(14deg) rotateY(-20deg) translateY(0); }
+  50% { transform: perspective(900px) rotateX(4deg) rotateY(-6deg) translateY(-14px); }
+}
+@keyframes recap-shadow {
+  0%, 100% { transform: scale(1); opacity: 0.45; }
+  50% { transform: scale(0.8); opacity: 0.25; }
+}
+@keyframes recap-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes recap-coin {
+  0%, 100% { transform: translateY(0) rotateY(-38deg) rotateZ(-10deg); }
+  50% { transform: translateY(-22px) rotateY(38deg) rotateZ(10deg); }
+}
+@keyframes recap-twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.6) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.1) rotate(12deg); }
+}
+@keyframes recap-shine {
+  from { background-position: 200% 50%; }
+  to { background-position: -200% 50%; }
+}
+@keyframes recap-hint {
+  0%, 100% { opacity: 0.45; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-4px); }
+}
+
+.recap-scene-in { animation: recap-scene-in 700ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.recap-scene-out { animation: recap-scene-out 500ms ease-in both; }
+.recap-rise { animation: recap-rise 800ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.recap-pop { animation: recap-pop 900ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.recap-blob { animation: recap-blob 14s ease-in-out infinite; will-change: transform; }
+.recap-tile { animation: recap-tile 5s ease-in-out infinite; transform-style: preserve-3d; will-change: transform; }
+.recap-shadow { animation: recap-shadow 5s ease-in-out infinite; }
+.recap-spin { animation: recap-spin 18s linear infinite; }
+.recap-spin-reverse { animation: recap-spin 26s linear infinite reverse; }
+.recap-coin { animation: recap-coin 6s ease-in-out infinite; transform-style: preserve-3d; will-change: transform; }
+.recap-twinkle { animation: recap-twinkle 2.6s ease-in-out infinite; }
+.recap-hint { animation: recap-hint 1.8s ease-in-out infinite; }
+.recap-shine {
+  background-size: 300% 100%;
+  animation: recap-shine 6s linear infinite;
+}
+
+/* Hold-to-pause freezes every looping animation in the scene too. */
+.recap-paused * { animation-play-state: paused !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .recap-root *,
+  .recap-root *::before,
+  .recap-root *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

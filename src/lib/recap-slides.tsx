@@ -1,21 +1,41 @@
+import {
+  CalendarDays,
+  Coins,
+  CreditCard,
+  Crown,
+  Flame,
+  PartyPopper,
+  PiggyBank,
+  Receipt,
+  Sparkles,
+  TrendingDown,
+  TrendingUp,
+  Trophy,
+  Wallet,
+} from "lucide-react";
 import { monthKeyLabel, shiftMonthKey } from "@/lib/money";
 import { translatePaymentMethod, type Language, type TranslationKey } from "@/lib/i18n";
 import type { AllTimeRecap, MonthlyRecap } from "@/lib/types";
-import type { RecapSlide } from "@/components/recap-story-viewer";
+import type { RecapSlide, RecapTheme } from "@/components/recap-story-viewer";
 
-const PALETTE = [
-  "#4C1D95",
-  "#0F766E",
-  "#9F1239",
-  "#92400E",
-  "#1E3A8A",
-  "#6D28D9",
-  "#065F46",
-  "#9A3412",
+const THEMES: RecapTheme[] = [
+  { from: "#1e0b3d", to: "#6d28d9", blobs: ["#a855f7", "#ec4899", "#6366f1"] },
+  { from: "#021f1a", to: "#047857", blobs: ["#34d399", "#22d3ee", "#a3e635"] },
+  { from: "#2a0612", to: "#be123c", blobs: ["#fb7185", "#f59e0b", "#f472b6"] },
+  { from: "#2b1203", to: "#c2410c", blobs: ["#fbbf24", "#fb923c", "#f43f5e"] },
+  { from: "#0b1437", to: "#1d4ed8", blobs: ["#60a5fa", "#818cf8", "#22d3ee"] },
+  { from: "#2a0730", to: "#a21caf", blobs: ["#e879f9", "#f472b6", "#a78bfa"] },
+  { from: "#03201f", to: "#0f766e", blobs: ["#2dd4bf", "#38bdf8", "#bef264"] },
+  { from: "#1c1206", to: "#a16207", blobs: ["#facc15", "#f97316", "#fde68a"] },
 ];
 
+type SlideDraft = Omit<RecapSlide, "theme">;
 type Translate = (key: TranslationKey, vars?: Record<string, string | number>) => string;
 type Format = (amount: number | bigint | string) => string;
+
+function withThemes(drafts: SlideDraft[]): RecapSlide[] {
+  return drafts.map((draft, i) => ({ ...draft, theme: THEMES[i % THEMES.length] }));
+}
 
 function dateLabel(iso: string, locale: string): string {
   return new Intl.DateTimeFormat(locale, {
@@ -26,26 +46,8 @@ function dateLabel(iso: string, locale: string): string {
   }).format(new Date(iso));
 }
 
-function Slide({
-  eyebrow,
-  value,
-  caption,
-}: {
-  eyebrow: string;
-  value: React.ReactNode;
-  caption?: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-3 text-center text-white">
-      <div className="text-sm font-semibold tracking-wide text-white/70 uppercase">{eyebrow}</div>
-      <div className="text-4xl leading-tight font-extrabold text-balance">{value}</div>
-      {caption ? <div className="text-base text-white/80">{caption}</div> : null}
-    </div>
-  );
-}
-
-function CategoryDot({ color }: { color: string }) {
-  return <span className="inline-block h-3 w-3 rounded-full align-middle" style={{ backgroundColor: color }} />;
+function abs(value: bigint): bigint {
+  return value < 0n ? -value : value;
 }
 
 export function buildMonthlySlides(
@@ -57,116 +59,105 @@ export function buildMonthlySlides(
   const monthLabel = monthKeyLabel(data.month, locale);
 
   if (!data.hasData) {
-    return [
+    return withThemes([
       {
-        background: PALETTE[0],
-        content: (
-          <Slide eyebrow={monthLabel} value={t("recap.noDataTitle")} caption={t("recap.noDataCaption")} />
-        ),
+        icon: Sparkles,
+        eyebrow: monthLabel,
+        value: { kind: "text", text: t("recap.noDataTitle") },
+        caption: t("recap.noDataCaption"),
       },
-    ];
+    ]);
   }
 
   const prevMonthLabel = monthKeyLabel(shiftMonthKey(data.month, -1), locale);
   const netSaved = BigInt(data.netSaved);
-  const slides: RecapSlide[] = [
+  const change = data.expenseChangePct;
+
+  const drafts: SlideDraft[] = [
     {
-      background: PALETTE[0],
-      content: <Slide eyebrow={t("recap.monthlyIntroEyebrow")} value={monthLabel} caption={t("recap.monthlyIntroCaption")} />,
+      icon: Sparkles,
+      eyebrow: t("recap.monthlyIntroEyebrow"),
+      value: { kind: "text", text: monthLabel },
+      caption: t("recap.monthlyIntroCaption"),
+      hint: t("recap.tapHint"),
     },
     {
-      background: PALETTE[1],
-      content: (
-        <Slide
-          eyebrow={t("recap.totalSpentEyebrow")}
-          value={format(data.totalExpenses)}
-          caption={
-            data.expenseChangePct === null
-              ? undefined
-              : data.expenseChangePct > 0
-                ? t("recap.totalSpentCaptionUp", { pct: data.expenseChangePct.toFixed(0), prevMonth: prevMonthLabel })
-                : data.expenseChangePct < 0
-                  ? t("recap.totalSpentCaptionDown", {
-                      pct: Math.abs(data.expenseChangePct).toFixed(0),
-                      prevMonth: prevMonthLabel,
-                    })
-                  : t("recap.totalSpentCaptionFlat", { prevMonth: prevMonthLabel })
-          }
-        />
-      ),
+      icon: Wallet,
+      eyebrow: t("recap.totalSpentEyebrow"),
+      value: { kind: "amount", amount: data.totalExpenses },
+      caption:
+        change === null
+          ? undefined
+          : change > 0
+            ? t("recap.totalSpentCaptionUp", { pct: change.toFixed(0), prevMonth: prevMonthLabel })
+            : change < 0
+              ? t("recap.totalSpentCaptionDown", { pct: Math.abs(change).toFixed(0), prevMonth: prevMonthLabel })
+              : t("recap.totalSpentCaptionFlat", { prevMonth: prevMonthLabel }),
     },
     {
-      background: PALETTE[2],
-      content: <Slide eyebrow={t("recap.totalIncomeEyebrow")} value={format(data.totalIncome)} />,
+      icon: TrendingUp,
+      eyebrow: t("recap.totalIncomeEyebrow"),
+      value: { kind: "amount", amount: data.totalIncome },
     },
     {
-      background: PALETTE[3],
-      content: (
-        <Slide
-          eyebrow={netSaved >= 0n ? t("recap.netSavedEyebrowPositive") : t("recap.netSavedEyebrowNegative")}
-          value={format(netSaved < 0n ? -netSaved : netSaved)}
-        />
-      ),
+      icon: netSaved >= 0n ? PiggyBank : TrendingDown,
+      eyebrow: netSaved >= 0n ? t("recap.netSavedEyebrowPositive") : t("recap.netSavedEyebrowNegative"),
+      value: { kind: "amount", amount: abs(netSaved).toString() },
     },
   ];
 
   if (data.topCategory) {
-    slides.push({
-      background: PALETTE[4],
-      content: (
-        <Slide
-          eyebrow={t("recap.topCategoryEyebrow")}
-          value={
-            <span>
-              <CategoryDot color={data.topCategory.color} /> {data.topCategory.name}
-            </span>
-          }
-          caption={t("recap.topCategoryCaption", { pct: data.topCategory.percentOfTotal.toFixed(0) })}
-        />
-      ),
+    drafts.push({
+      icon: Crown,
+      eyebrow: t("recap.topCategoryEyebrow"),
+      value: { kind: "text", text: data.topCategory.name, dotColor: data.topCategory.color },
+      caption: t("recap.topCategoryCaption", { pct: data.topCategory.percentOfTotal.toFixed(0) }),
     });
   }
 
   if (data.biggestExpense) {
-    slides.push({
-      background: PALETTE[5],
-      content: (
-        <Slide
-          eyebrow={t("recap.biggestExpenseEyebrow")}
-          value={format(data.biggestExpense.amount)}
-          caption={t("recap.biggestExpenseCaption", {
-            category: data.biggestExpense.categoryName,
-            date: dateLabel(data.biggestExpense.occurredAt, locale),
-          })}
-        />
-      ),
+    drafts.push({
+      icon: Flame,
+      eyebrow: t("recap.biggestExpenseEyebrow"),
+      value: { kind: "amount", amount: data.biggestExpense.amount },
+      caption: t("recap.biggestExpenseCaption", {
+        category: data.biggestExpense.categoryName,
+        date: dateLabel(data.biggestExpense.occurredAt, locale),
+      }),
     });
   }
 
-  slides.push({
-    background: PALETTE[6],
-    content: (
-      <Slide
-        eyebrow={t("recap.activityEyebrow")}
-        value={data.transactionCount}
-        caption={t("recap.activityCaption", { days: data.daysWithSpending })}
-      />
-    ),
-  });
+  drafts.push(
+    {
+      icon: Receipt,
+      eyebrow: t("recap.activityEyebrow"),
+      value: { kind: "count", count: data.transactionCount },
+      caption: t("recap.activityCaption", { days: data.daysWithSpending }),
+    },
+    {
+      icon: CalendarDays,
+      eyebrow: t("recap.avgDailyEyebrow"),
+      value: { kind: "amount", amount: data.avgDailySpend },
+      caption: t("recap.avgDailyCaption"),
+    },
+    {
+      icon: PartyPopper,
+      eyebrow: t("recap.monthlyOutroEyebrow"),
+      value: { kind: "text", text: monthLabel },
+      caption: t("recap.monthlyOutroCaption"),
+      summary: [
+        { label: t("recap.summarySpent"), value: format(data.totalExpenses) },
+        { label: t("recap.summaryIncome"), value: format(data.totalIncome) },
+        {
+          label: netSaved >= 0n ? t("recap.summarySaved") : t("recap.summaryOverspent"),
+          value: format(abs(netSaved)),
+        },
+        { label: t("recap.summaryTopCategory"), value: data.topCategory?.name ?? "—" },
+      ],
+    }
+  );
 
-  slides.push({
-    background: PALETTE[7],
-    content: (
-      <Slide eyebrow={t("recap.avgDailyEyebrow")} value={format(data.avgDailySpend)} caption={t("recap.avgDailyCaption")} />
-    ),
-  });
-
-  slides.push({
-    background: PALETTE[0],
-    content: <Slide eyebrow={t("recap.monthlyOutroEyebrow")} value={monthLabel} caption={t("recap.monthlyOutroCaption")} />,
-  });
-
-  return slides;
+  return withThemes(drafts);
 }
 
 export function buildAllTimeSlides(
@@ -177,119 +168,103 @@ export function buildAllTimeSlides(
   language: Language
 ): RecapSlide[] {
   if (!data.hasData) {
-    return [
+    return withThemes([
       {
-        background: PALETTE[0],
-        content: <Slide eyebrow={t("recap.allTimeCardTitle")} value={t("recap.noDataTitle")} caption={t("recap.noDataCaption")} />,
+        icon: Trophy,
+        eyebrow: t("recap.allTimeCardTitle"),
+        value: { kind: "text", text: t("recap.noDataTitle") },
+        caption: t("recap.noDataCaption"),
       },
-    ];
+    ]);
   }
 
   const netBalance = BigInt(data.netBalance);
-  const slides: RecapSlide[] = [
+
+  const drafts: SlideDraft[] = [
     {
-      background: PALETTE[0],
-      content: (
-        <Slide
-          eyebrow={t("recap.allTimeIntroEyebrow")}
-          value={t("recap.allTimeCardTitle")}
-          caption={t("recap.allTimeIntroCaption", { date: dateLabel(data.firstTransactionDate, locale) })}
-        />
-      ),
+      icon: Trophy,
+      eyebrow: t("recap.allTimeIntroEyebrow"),
+      value: { kind: "text", text: t("recap.allTimeCardTitle") },
+      caption: t("recap.allTimeIntroCaption", { date: dateLabel(data.firstTransactionDate, locale) }),
+      hint: t("recap.tapHint"),
     },
     {
-      background: PALETTE[1],
-      content: <Slide eyebrow={t("recap.allTimeSpentEyebrow")} value={format(data.totalExpenses)} />,
+      icon: Wallet,
+      eyebrow: t("recap.allTimeSpentEyebrow"),
+      value: { kind: "amount", amount: data.totalExpenses },
     },
     {
-      background: PALETTE[2],
-      content: <Slide eyebrow={t("recap.allTimeIncomeEyebrow")} value={format(data.totalIncome)} />,
+      icon: Coins,
+      eyebrow: t("recap.allTimeIncomeEyebrow"),
+      value: { kind: "amount", amount: data.totalIncome },
     },
     {
-      background: PALETTE[3],
-      content: (
-        <Slide
-          eyebrow={netBalance >= 0n ? t("recap.netBalanceEyebrowPositive") : t("recap.netBalanceEyebrowNegative")}
-          value={format(netBalance < 0n ? -netBalance : netBalance)}
-        />
-      ),
+      icon: netBalance >= 0n ? PiggyBank : TrendingDown,
+      eyebrow: netBalance >= 0n ? t("recap.netBalanceEyebrowPositive") : t("recap.netBalanceEyebrowNegative"),
+      value: { kind: "amount", amount: abs(netBalance).toString() },
     },
   ];
 
   if (data.topCategory) {
-    slides.push({
-      background: PALETTE[4],
-      content: (
-        <Slide
-          eyebrow={t("recap.topCategoryEyebrow")}
-          value={
-            <span>
-              <CategoryDot color={data.topCategory.color} /> {data.topCategory.name}
-            </span>
-          }
-          caption={t("recap.topCategoryAllTimeCaption", { pct: data.topCategory.percentOfTotal.toFixed(0) })}
-        />
-      ),
+    drafts.push({
+      icon: Crown,
+      eyebrow: t("recap.topCategoryEyebrow"),
+      value: { kind: "text", text: data.topCategory.name, dotColor: data.topCategory.color },
+      caption: t("recap.topCategoryAllTimeCaption", { pct: data.topCategory.percentOfTotal.toFixed(0) }),
     });
   }
 
   if (data.biggestExpense) {
-    slides.push({
-      background: PALETTE[5],
-      content: (
-        <Slide
-          eyebrow={t("recap.biggestExpenseEyebrow")}
-          value={format(data.biggestExpense.amount)}
-          caption={t("recap.biggestExpenseCaption", {
-            category: data.biggestExpense.categoryName,
-            date: dateLabel(data.biggestExpense.occurredAt, locale),
-          })}
-        />
-      ),
+    drafts.push({
+      icon: Flame,
+      eyebrow: t("recap.biggestExpenseEyebrow"),
+      value: { kind: "amount", amount: data.biggestExpense.amount },
+      caption: t("recap.biggestExpenseCaption", {
+        category: data.biggestExpense.categoryName,
+        date: dateLabel(data.biggestExpense.occurredAt, locale),
+      }),
     });
   }
 
   if (data.busiestMonth) {
-    slides.push({
-      background: PALETTE[6],
-      content: (
-        <Slide
-          eyebrow={t("recap.busiestMonthEyebrow")}
-          value={monthKeyLabel(data.busiestMonth.month, locale)}
-          caption={format(data.busiestMonth.total)}
-        />
-      ),
+    drafts.push({
+      icon: CalendarDays,
+      eyebrow: t("recap.busiestMonthEyebrow"),
+      value: { kind: "text", text: monthKeyLabel(data.busiestMonth.month, locale) },
+      caption: format(data.busiestMonth.total),
     });
   }
 
-  slides.push({
-    background: PALETTE[7],
-    content: (
-      <Slide
-        eyebrow={t("recap.transactionsEyebrow")}
-        value={data.transactionCount}
-        caption={t("recap.transactionsCaption", { months: data.monthsActive })}
-      />
-    ),
+  drafts.push({
+    icon: Receipt,
+    eyebrow: t("recap.transactionsEyebrow"),
+    value: { kind: "count", count: data.transactionCount },
+    caption: t("recap.transactionsCaption", { months: data.monthsActive }),
   });
 
   if (data.topPaymentMethod) {
-    slides.push({
-      background: PALETTE[1],
-      content: (
-        <Slide
-          eyebrow={t("recap.topPaymentEyebrow")}
-          value={translatePaymentMethod(data.topPaymentMethod, language)}
-        />
-      ),
+    drafts.push({
+      icon: CreditCard,
+      eyebrow: t("recap.topPaymentEyebrow"),
+      value: { kind: "text", text: translatePaymentMethod(data.topPaymentMethod, language) },
     });
   }
 
-  slides.push({
-    background: PALETTE[0],
-    content: <Slide eyebrow={t("recap.allTimeOutroEyebrow")} value={t("recap.allTimeCardTitle")} caption={t("recap.allTimeOutroCaption")} />,
+  drafts.push({
+    icon: PartyPopper,
+    eyebrow: t("recap.allTimeOutroEyebrow"),
+    value: { kind: "text", text: t("recap.allTimeCardTitle") },
+    caption: t("recap.allTimeOutroCaption"),
+    summary: [
+      { label: t("recap.summarySpent"), value: format(data.totalExpenses) },
+      { label: t("recap.summaryIncome"), value: format(data.totalIncome) },
+      {
+        label: netBalance >= 0n ? t("recap.summaryNet") : t("recap.summaryOverspent"),
+        value: format(abs(netBalance)),
+      },
+      { label: t("recap.summaryTransactions"), value: String(data.transactionCount) },
+    ],
   });
 
-  return slides;
+  return withThemes(drafts);
 }
-
